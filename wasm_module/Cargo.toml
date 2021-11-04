@@ -1,0 +1,33 @@
+[package]
+name = "wasm_module"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+wasm-bindgen = "0.2.8"
+gloo="0.3.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies.js-sys]
+version = "0.3.5"
+
+[dependencies.web-sys]
+version = "0.3.5"
+features = [
+  'console',
+  'Document',
+  'Window',
+  'HtmlElement',
+  'HtmlCollection',
+  'HtmlCanvasElement',
+  'HtmlParagraphElement',
+  'SvgElement',
+  'CanvasRenderingContext2d',
+  'KeyboardEvent',
+  'CssStyleDeclaration',
+  'Node',
+]
