@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 const isProd = process.env.NODE_ENV === 'PRODUCTION';
 
@@ -85,6 +86,9 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       IS_PRODUCTION: isProd,
+    }),
+    new WasmPackPlugin({
+      crateDirectory: './wasm_module',
     }),
   ],
   experiments: {

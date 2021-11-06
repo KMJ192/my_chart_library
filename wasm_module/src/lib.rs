@@ -1,4 +1,5 @@
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 
 #[cfg(test)]
 mod tests {
@@ -8,7 +9,10 @@ mod tests {
     }
 }
 
+pub mod pie_chart;
+use pie_chart::PieChart;
+
 #[wasm_bindgen]
-pub fn console_test(str: String){
-    web_sys::console::log_1(&str.into());
+pub fn pie_chart_module(){
+    
 }
