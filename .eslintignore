@@ -1,0 +1,9 @@
+build/*
+public/*
+declaration.d.ts
+webpack*
+babel*
+postcss*
+node_modules/*
+package.json
+.eslintrc
