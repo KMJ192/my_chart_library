@@ -1,4 +1,10 @@
-import PieChartParam, { PieChartData, PieChartElement, EachDataAreaType } from './PieChartTypes';
+import PieChartParam, {
+  PieChartData,
+  PieChartElement,
+  EachDataAreaType,
+  defaultChartValue,
+  PieChartEvent,
+} from './PieChartTypes';
 
 class PieChart {
   private canvas: HTMLCanvasElement;
@@ -18,6 +24,8 @@ class PieChart {
   private centerText: {
     visible: boolean;
     text?: string;
+    style?: string;
+    colot?: string;
   };
 
   private totalValue?: number;
@@ -33,6 +41,8 @@ class PieChart {
 
   private circumference: number = Math.PI / 180;
 
+  private chartHovered: boolean = false;
+
   constructor(params: PieChartParam) {
     const { canvas, ctx, data, chartFillColor, pieChartBorder, centerText, totalValue } = params;
     this.canvas = canvas;
@@ -41,7 +51,7 @@ class PieChart {
 
     this.inputData = data;
 
-    this.chartFillColor = chartFillColor || 'rgb(230, 230, 230)';
+    this.chartFillColor = chartFillColor || defaultChartValue.CHART_COLOR;
 
     this.pieChartBorder = pieChartBorder;
 
@@ -53,6 +63,8 @@ class PieChart {
       width: canvas.width,
       height: canvas.height,
     };
+
+    this.radius = (this.canvasSize.width / 2) * 0.5;
 
     this.eachDataArea = data ? data.slice().map(() => []) : [];
   }
@@ -76,7 +88,7 @@ class PieChart {
         this.expressionData.push({
           title: element.title,
           value: element.value,
-          color: element.color,
+          fillColor: element.fillColor,
           angleValue: this.degree * rate,
         });
       });
@@ -86,7 +98,7 @@ class PieChart {
       const rate = mod / this.totalValue;
       this.expressionData.push({
         value: mod,
-        color: this.chartFillColor,
+        fillColor: this.chartFillColor,
         angleValue: this.degree * rate,
       });
     }
@@ -96,13 +108,13 @@ class PieChart {
   private drawChart() {
     this.degree = 0;
     for (let i: number = 0; i < this.expressionData.length; i++) {
-      const { title, angleValue, color } = this.expressionData[i];
+      const { title, angleValue, fillColor } = this.expressionData[i];
       this.ctx.save();
 
       this.ctx.beginPath();
       this.ctx.moveTo(this.canvasSize.width / 2, this.canvasSize.height / 2);
-      this.ctx.fillStyle = color;
-      this.ctx.strokeStyle = color;
+      this.ctx.fillStyle = fillColor;
+      this.ctx.strokeStyle = fillColor;
 
       if (i === 0) {
         this.ctx.arc(
@@ -150,12 +162,168 @@ class PieChart {
 
       this.ctx.restore();
     }
-    // this.centerHole();
+    this.centerHole();
+  }
+
+  private centerHole() {
+    const bolder: number = 0.5;
+    this.degree = 0;
+
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.canvasSize.width / 2, this.canvasSize.height / 2);
+
+    this.ctx.arc(
+      this.canvasSize.width / 2,
+      this.canvasSize.height / 2,
+      this.radius * bolder,
+      0,
+      this.circumference * 360,
+      false,
+    );
+    this.ctx.closePath();
+    this.ctx.restore();
+  }
+
+  private degreeToRadians(deg: number): number {
+    return deg * this.circumference;
+  }
+
+  private textDraw(idx?: number) {
+    for (let i = 0; i < this.eachDataArea.length; i++) {
+      const { title, startEndDegree: value } = this.eachDataArea[i][0];
+      if (title !== undefined && title.visible === true) {
+        const half = (this.eachDataArea[i][1].startEndDegree - value) / 2;
+        const deg = value + half;
+        const dtr = this.degreeToRadians(deg);
+        const xx = Math.cos(dtr) * (this.radius * 0.8) + this.canvasSize.width / 2;
+        const yy = Math.sin(dtr) * (this.radius * 0.8) + this.canvasSize.width / 2;
+
+        const minus = this.ctx.measureText(title.text).width / 2;
+        this.ctx.save();
+        if (idx === undefined) {
+          this.ctx.font = title.color || defaultChartValue.FONT_STYLE;
+          this.ctx.fillStyle = defaultChartValue.TEXT_COLOR;
+        } else if (idx !== undefined && idx === i) {
+          this.ctx.font = 'normal bold 20px serif';
+          this.ctx.fillStyle = 'blue';
+        } else {
+          this.ctx.font = title.color || defaultChartValue.FONT_STYLE;
+          this.ctx.fillStyle = defaultChartValue.TEXT_COLOR;
+        }
+        this.ctx.fillText(title.text, xx - minus, yy);
+        this.ctx.restore();
+      }
+    }
+  }
+
+  private isInside(mouseX: number, mouseY: number) {
+    let retVal: PieChartEvent = {
+      result1: false,
+      result2: false,
+      index: -1,
+      degree: 0,
+    };
+    const posX = this.canvasSize.width / 2 - mouseX;
+    const posY = this.canvasSize.height / 2 - mouseY;
+    let rad = Math.atan2(posY, posX);
+    rad = (rad * 180) / Math.PI;
+    rad += 180;
+
+    const circleLen = this.radius;
+    const len = Math.sqrt(Math.abs(posX * posY) + Math.abs(posY * posY));
+    if (len <= circleLen) {
+      retVal = {
+        ...retVal,
+        result1: true,
+      };
+      this.eachDataArea.forEach((area: EachDataAreaType[], idx: number) => {
+        if (rad >= area[0].startEndDegree && rad <= area[1].startEndDegree) {
+          retVal = {
+            ...retVal,
+            result2: true,
+            index: idx,
+          };
+        }
+      });
+    }
+    retVal = {
+      ...retVal,
+      degree: rad,
+    };
+
+    return retVal;
+  }
+
+  private hoverArea(idx: number) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+    // ctx.globalCompositeOperation = 'destination-out';
+    // ctx.arc(this.canvasSize.width / 2, this.canvasSize.height / 2, );
+
+    this.degree = 0;
+    for (let i: number = 0; i < this.expressionData.length; i++) {
+      const { angleValue } = this.expressionData[i];
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(this.canvasSize.width / 2, this.canvasSize.height / 2);
+
+      let innRadius = this.radius;
+      if (idx === i) {
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'blue';
+        innRadius = this.radius * 1.15;
+      }
+      if (i === 0) {
+        ctx.arc(
+          this.canvasSize.width / 2,
+          this.canvasSize.height / 2,
+          innRadius,
+          0,
+          this.circumference * angleValue,
+          false,
+        );
+        this.degree = angleValue;
+      } else {
+        ctx.arc(
+          this.canvasSize.width / 2,
+          this.canvasSize.height / 2,
+          innRadius,
+          this.circumference * this.degree,
+          this.circumference * (this.degree + angleValue),
+          false,
+        );
+        this.degree += angleValue;
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 
   draw() {
     this.calcData();
     this.drawChart();
+    this.textDraw();
+  }
+
+  hoverEvent() {
+    this.canvas.addEventListener('mousemove', (e: MouseEvent) => {
+      const mouseX: number = e.clientX - this.canvas.offsetLeft;
+      const mouseY: number = e.clientY - this.canvas.offsetTop;
+      const inn: PieChartEvent = this.isInside(mouseX, mouseY);
+      if (inn.index > -1) {
+        this.chartHovered = true;
+        this.hoverArea(inn.index);
+        this.textDraw(inn.index);
+      } else {
+        if (this.chartHovered) {
+          this.hoverArea(-1);
+          this.textDraw(-1);
+        }
+        this.chartHovered = true;
+      }
+    });
   }
 }
 export default PieChart;

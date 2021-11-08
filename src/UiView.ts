@@ -30,6 +30,7 @@ function UiView() {
     };
     const pieChart = new PieChart(pieChartParam);
     pieChart.draw();
+    pieChart.hoverEvent();
   }
 
   renderingContainer.appendChild(canvas);
