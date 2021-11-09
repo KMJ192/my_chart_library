@@ -4,13 +4,7 @@ export default interface PieChartParam {
   chartType?: 'primary' | 'donut';
   data: PieChartData[];
   chartFillColor?: string;
-  pieChartBorder: string;
-  centerText: {
-    visible: boolean;
-    text?: string;
-    style?: string;
-    colot?: string;
-  };
+  chartSize?: number;
   totalValue?: number;
 }
 
@@ -21,10 +15,17 @@ interface DataTitle {
   style?: string;
 }
 
+interface HoverType {
+  chartColor: string;
+  fontColor?: string;
+  fontStyle?: string;
+}
+
 interface PieChartData {
   title?: DataTitle;
   value: number;
   fillColor: string;
+  hover?: HoverType;
 }
 
 interface PieChartElement extends PieChartData {
@@ -34,6 +35,7 @@ interface PieChartElement extends PieChartData {
 interface EachDataAreaType {
   title?: DataTitle;
   startEndDegree: number;
+  hover?: HoverType;
 }
 
 interface PieChartType {
@@ -48,14 +50,16 @@ const pieChartType: PieChartType = {
 
 interface DefaultChartValue {
   readonly CHART_COLOR: string;
+  readonly HOVER_CHART_COLOR: string;
   readonly FONT_STYLE: string;
-  readonly TEXT_COLOR: string;
+  readonly FONT_COLOR: string;
 }
 
 const defaultChartValue: DefaultChartValue = {
   CHART_COLOR: 'rgb(230, 230, 230)',
+  HOVER_CHART_COLOR: '#BAAAD7',
   FONT_STYLE: 'normal bold 15px serif',
-  TEXT_COLOR: 'black',
+  FONT_COLOR: 'black',
 };
 
 interface PieChartEvent {

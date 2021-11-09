@@ -20,13 +20,10 @@ function UiView() {
     const pieChartParam: PieChartParam = {
       canvas,
       ctx,
+      chartType: 'primary',
       data: pieChartMockData,
-      pieChartBorder: 'border',
-      centerText: {
-        visible: true,
-        text: 'centerText',
-      },
       totalValue: 6,
+      chartSize: 500,
     };
     const pieChart = new PieChart(pieChartParam);
     pieChart.draw();
