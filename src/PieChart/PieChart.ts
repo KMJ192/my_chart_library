@@ -299,8 +299,8 @@ class PieChart {
     this.textDraw();
   }
 
-  public hoverEvent() {
-    this.canvas.addEventListener('mousemove', (e: MouseEvent) => {
+  public hoverEvent(dest: boolean) {
+    const hover = (e: MouseEvent) => {
       const mouseX: number = e.clientX - this.canvas.offsetLeft;
       const mouseY: number = e.clientY - this.canvas.offsetTop;
       const inn: PieChartEvent = this.isInside(mouseX, mouseY);
@@ -316,7 +316,10 @@ class PieChart {
         }
         this.chartHovered = false;
       }
-    });
+    };
+
+    if (dest === false) this.canvas.addEventListener('mousemove', hover);
+    else this.canvas.removeEventListener('mousemove', hover);
   }
 }
 

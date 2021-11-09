@@ -12,6 +12,7 @@ const buildDir = 'build';
 const extensions = ['.js', '.jsx', '.ts', '.tsx', '.wasm'];
 const alias = {
   '@src': path.resolve(__dirname, 'src'),
+  '@wasm': path.resolve(__dirname, 'wasm_module/pkg'),
 };
 
 const postcssLoader = {

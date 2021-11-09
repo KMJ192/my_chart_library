@@ -9,10 +9,10 @@ mod tests {
     }
 }
 
-// pub mod pie_chart;
-// use pie_chart::PieChart;
+pub mod pie_chart;
+use pie_chart::*;
 
-// #[wasm_bindgen]
-// pub fn pie_chart_module(){
-    
-// }
+#[wasm_bindgen]
+pub fn pie_chart_module(param: &JsValue){
+    web_sys::console::log_1(&param.into());
+}

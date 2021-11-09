@@ -27,7 +27,9 @@ function UiView() {
     };
     const pieChart = new PieChart(pieChartParam);
     pieChart.draw();
-    pieChart.hoverEvent();
+    pieChart.hoverEvent(false);
+
+    import('@wasm').then((wasm) => wasm.pie_chart_module(pieChartParam));
   }
 
   renderingContainer.appendChild(canvas);
