@@ -9,6 +9,8 @@ const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 const isProd = process.env.NODE_ENV === 'PRODUCTION';
 
 const buildDir = 'build';
+const viewDir = 'dist';
+
 const extensions = ['.js', '.jsx', '.ts', '.tsx', '.wasm'];
 const alias = {
   '@src': path.resolve(__dirname, 'src'),
@@ -32,7 +34,7 @@ const cssLoader = {
 };
 
 module.exports = {
-  entry: './src/index.ts',
+  entry: isProd ? './index.ts' : './src/index.ts',
   resolve: {
     extensions,
     alias,
@@ -67,7 +69,7 @@ module.exports = {
   },
   output: {
     filename: '[name].[chunkhash].js',
-    path: path.join(__dirname, buildDir),
+    path: isProd ? path.join(__dirname, buildDir) : path.join(__dirname, viewDir),
   },
   plugins: [
     new HtmlWebpackPlugin({

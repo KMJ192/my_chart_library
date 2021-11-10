@@ -2,7 +2,7 @@
   "name": "my-chart-library",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "build/index.js",
   "keywords": [],
   "author": "MyeongJunKim",
   "license": "ISC",
@@ -39,8 +39,9 @@
     "webpack-merge": "^5.8.0"
   },
   "scripts": {
-    "build:project": "rm -rf build && cross-env NODE_ENV=PRODUCTION webpack --config webpack.prod.js",
+    "build": "rm -rf build && cross-env NODE_ENV=PRODUCTION webpack --config webpack.prod.js",
     "build:wasm": "cd wasm_module && wasm-pack build",
+    "build:view": "cross-env NODE_ENV=VIEW webpack --config webpack.prod.js",
     "start": "cross-env NODE_ENV=DEVELOPMENT webpack serve --config webpack.dev.js"
   }
 }
