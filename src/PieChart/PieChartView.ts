@@ -77,7 +77,6 @@ export function renderPieChartCode(): string {
       pieChart.hoverEvent(false);
     }
   `;
-  code.replaceAll(';', ';\n');
 
   return code;
 }
