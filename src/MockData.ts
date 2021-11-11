@@ -23,7 +23,7 @@ export const pieChartMockData: PieChartData[] = [
     fillColor: '#557FD4',
     hover: {
       chartColor: '#878952',
-      fontColor: 'blue',
+      fontColor: 'red',
       fontStyle: 'normal bold 20px serif',
     },
   },

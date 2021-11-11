@@ -1,14 +1,18 @@
 export default interface PieChartParam {
   canvas: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
   chartType?: 'primary' | 'donut';
   data: PieChartData[];
   chartFillColor?: string;
   chartSize?: number;
   totalValue?: number;
+  displayValue?: {
+    visible?: boolean;
+    color?: string;
+    style?: string;
+  };
 }
 
-interface DataTitle {
+export interface TextType {
   text: string;
   visible?: boolean;
   color?: string;
@@ -22,7 +26,7 @@ interface HoverType {
 }
 
 interface PieChartData {
-  title?: DataTitle;
+  title?: TextType;
   value: number;
   fillColor: string;
   hover?: HoverType;
@@ -33,7 +37,7 @@ interface PieChartElement extends PieChartData {
 }
 
 interface EachDataAreaType {
-  title?: DataTitle;
+  title?: TextType;
   startEndDegree: number;
   hover?: HoverType;
 }
@@ -53,6 +57,7 @@ interface DefaultChartValue {
   readonly HOVER_CHART_COLOR: string;
   readonly FONT_STYLE: string;
   readonly FONT_COLOR: string;
+  readonly CHART_SIZE: number;
 }
 
 const defaultChartValue: DefaultChartValue = {
@@ -60,6 +65,7 @@ const defaultChartValue: DefaultChartValue = {
   HOVER_CHART_COLOR: '#BAAAD7',
   FONT_STYLE: 'normal bold 15px serif',
   FONT_COLOR: 'black',
+  CHART_SIZE: 500,
 };
 
 interface PieChartEvent {
@@ -70,7 +76,7 @@ interface PieChartEvent {
 }
 
 export {
-  DataTitle,
+  TextType as DataTitle,
   PieChartData,
   PieChartElement,
   EachDataAreaType,
