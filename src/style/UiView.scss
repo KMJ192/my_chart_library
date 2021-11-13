@@ -1,3 +1,5 @@
+$container-width: 1200px;
+
 $bolder-black: 2px solid #000000;
 $bolder-black-00: 2px solid rgba(0, 0, 0, 0.3);
 $line-style: 1px solid rgba(0, 0, 0, 0.3);
@@ -9,32 +11,48 @@ $line-style: 1px solid rgba(0, 0, 0, 0.3);
 
 #root {
   padding: 20px;
+  display: grid;
+  grid-gap: 100px;
   .chart-view-container {
     border: $bolder-black;
-    width: 1210px;
+    width: $container-width;
     height: 100%;
-    display: grid;
-    grid-template-columns: 600px 600px;
-    column-gap: 10px;
+    display: flex;
     padding: 10px;
+    .chart-title {
+      padding: 0;
+      position: absolute;
+      margin-top: 10px;
+      margin-left: 30px;
+      font: bolder 20px sans-serif;
+    }
     .view-box {
       border: $bolder-black-00;
+      width: $container-width - 700px;
+      margin-right: 10px;
     }
     .code-box {
       border: $bolder-black-00;
-      overflow: auto;
-      .code-body {
-        display: grid;
-        font: bolder;
-        grid-template-rows: minmax(50px, auto) 100%;
-        .explanation {
-          padding-left: 5px;
-          font: bolder 20px sans-serif;
-          border-bottom: $line-style;
-        }
-        .code {
-          padding: 10px 5px 10px 5px;
-          font: bolder 13px sans-serif;
+      width: $container-width - 500px;
+      display: grid;
+      font: bolder;
+      grid-template-rows: minmax(50px, auto) 100%;
+      .explanation {
+        padding-bottom: 10px;
+        padding-left: 10px;
+        font: bolder 20px sans-serif;
+        border-bottom: $line-style;
+        vertical-align: middle;
+        height: 50px;
+        line-height: 50px;
+      }
+      .code {
+        overflow: auto;
+        padding: 10px 5px 10px 5px;
+        font: bolder 13px sans-serif;
+        &::-webkit-scrollbar {
+          width: 3px;
+          background-color: #6e6e6e;
         }
       }
     }

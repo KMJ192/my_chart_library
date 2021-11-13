@@ -2,7 +2,6 @@ import PieChartParam, {
   PieChartData,
   PieChartElement,
   EachDataAreaType,
-  TextType,
   defaultChartValue,
   PieChartEvent,
   pieChartType,
@@ -187,6 +186,8 @@ class PieChart {
           end = this.circumference * (this.degree + angleValue);
           this.degree += angleValue;
         }
+        // start += 1;
+        // end += 1;
         ctx.arc(this.chartPosition.x, this.chartPosition.y, this.radius, start, end, false);
 
         ctx.closePath();
@@ -317,6 +318,8 @@ class PieChart {
 
         ctx.closePath();
         ctx.fill();
+        if (idx !== i) ctx.stroke();
+
         ctx.restore();
       }
       this.centerMaker();
@@ -373,8 +376,8 @@ class PieChart {
   // hover event 함수
   public hoverEvent(dest: boolean) {
     const hover = (e: MouseEvent) => {
-      const mouseX: number = e.clientX - this.canvas.offsetLeft;
-      const mouseY: number = e.clientY - this.canvas.offsetTop;
+      const mouseX: number = e.pageX - this.canvas.offsetLeft;
+      const mouseY: number = e.pageY - this.canvas.offsetTop;
       const inn: PieChartEvent = this.isInside(mouseX, mouseY);
 
       if (inn.index > -1) {

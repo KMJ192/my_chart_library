@@ -1,28 +1,33 @@
-import { renderPieChart, renderPieChartCode } from './PieChart/PieChartView';
+import { primaryPieChart, donutChart } from './PieChart/PieChartView';
+import { ViewListParam } from './viewTypes';
+
 import './style/UiView.scss';
 
-function UiView() {
-  const header = `<div class='header'>Chart Library</div>`;
+const root = document.getElementById('root');
+const chartList = [primaryPieChart, donutChart];
 
-  const root = document.getElementById('root');
+function viewList({ renderChart, renderCode, chartName }: ViewListParam) {
+  const titleElement = document.createElement('div');
+  const title = `<div class='chart-title'>${chartName}</div>`;
+  titleElement.innerHTML = title;
+
   const renderingContainer = document.createElement('div');
   renderingContainer.className = 'chart-view-container';
+  renderingContainer.insertAdjacentElement('afterbegin', titleElement);
 
   const viewBox = document.createElement('div');
   const codeBox = document.createElement('div');
   viewBox.className = 'view-box';
   codeBox.className = 'code-box';
 
-  const canvas = renderPieChart();
+  const canvas = renderChart();
   viewBox.appendChild(canvas);
 
   const html = `
-    <div class='code-body'>
       <div class='explanation'>code</div>
       <div class='code'>
-        ${renderPieChartCode()}
+        ${renderCode()}
       </div>
-    </div>
   `;
 
   codeBox.innerHTML = html;
@@ -31,6 +36,15 @@ function UiView() {
   renderingContainer.appendChild(codeBox);
 
   root?.appendChild(renderingContainer);
+}
+
+function UiView() {
+  const header = `<div class='header'>Chart Library</div>`;
+
+  chartList.forEach((ele: ViewListParam) => {
+    viewList(ele);
+  });
+
   root?.insertAdjacentHTML('beforebegin', header);
 }
 
