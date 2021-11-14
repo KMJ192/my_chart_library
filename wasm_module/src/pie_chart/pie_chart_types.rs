@@ -1,3 +1,6 @@
+use serde::{Serialize, Deserialize};
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PieChartData {
   title: Option<String>,
   value: f64,
@@ -5,6 +8,21 @@ pub struct PieChartData {
   hover: Option<HoverType>,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct DisplayValueType {
+  visible: Option<bool>,
+  color: Option<String>,
+  style: Option<String>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct HoverType {
+  chart_color: String,
+  font_color: Option<String>,
+  font_style: Option<String>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PieChartParam {
   ele_id: String,
   chart_type: String,
@@ -13,16 +31,4 @@ pub struct PieChartParam {
   chart_size: u32,
   total_value: Option<f64>,
   display_value: Option<DisplayValueType>,
-}
-
-pub struct DisplayValueType {
-  visible: Option<bool>,
-  color: Option<String>,
-  style: Option<String>,
-}
-
-pub struct HoverType {
-  chart_color: String,
-  font_color: Option<String>,
-  font_style: Option<String>,
 }

@@ -7,3 +7,11 @@ const param = {
 };
 const uiView = new UiView(param);
 uiView.uiViewRender();
+
+const temp = {
+  ele_id: 'test',
+};
+
+import('@wasm').then((module: any) => {
+  module.pie_chart_module(temp);
+});

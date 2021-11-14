@@ -28,7 +28,6 @@ features = [
   'HtmlCollection',
   'HtmlCanvasElement',
   'HtmlParagraphElement',
-  'SvgElement',
   'CanvasRenderingContext2d',
   'KeyboardEvent',
   'CssStyleDeclaration',
