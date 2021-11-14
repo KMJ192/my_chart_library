@@ -1,51 +1,101 @@
 import { primaryPieChart, donutChart } from './PieChart/PieChartView';
-import { ViewListParam } from './viewTypes';
+import { ViewListParam, UiViewTypes, BodyContentsType, TopContentsType } from './viewTypes';
 
 import './style/UiView.scss';
 
-const root = document.getElementById('root');
-const chartList = [primaryPieChart, donutChart];
+export const root = document.getElementById('root');
+export const chartList: UiViewTypes[] = [primaryPieChart, donutChart];
 
-function viewList({ renderChart, renderCode, chartName }: ViewListParam) {
-  const titleElement = document.createElement('div');
-  const title = `<div class='chart-title'>${chartName}</div>`;
-  titleElement.innerHTML = title;
+export class UiView {
+  private root: HTMLElement | null;
 
-  const renderingContainer = document.createElement('div');
-  renderingContainer.className = 'chart-view-container';
-  renderingContainer.insertAdjacentElement('afterbegin', titleElement);
+  private viewList: UiViewTypes[];
 
-  const viewBox = document.createElement('div');
-  const codeBox = document.createElement('div');
-  viewBox.className = 'view-box';
-  codeBox.className = 'code-box';
+  private topElement: HTMLDivElement | null;
 
-  const canvas = renderChart();
-  viewBox.appendChild(canvas);
+  constructor(param: ViewListParam) {
+    const { viewList, eleId } = param;
+    this.viewList = viewList;
+    this.root = document.getElementById(eleId);
+    this.topElement = null;
+  }
 
-  const html = `
-      <div class='explanation'>code</div>
+  private topContentRender({ chartName, viewPreview }: TopContentsType) {
+    const priviewActive = viewPreview ? 'active' : 'hide';
+    const codeActive = viewPreview ? 'hide' : 'active';
+
+    const topElement = document.createElement('div');
+    topElement.className = 'chart-top-content';
+
+    const titleElement = `
+      <div class='chart-title'>
+        ${chartName}
+      </div>
+      <div class='tabs'>
+        <div class='tab-button view ${priviewActive}'>Preview</div>
+        <div class='tab-button code ${codeActive}'>Code</div>
+      </div>
+    `;
+    topElement.insertAdjacentHTML('afterbegin', titleElement);
+
+    return topElement;
+  }
+
+  private bodyContentRender({ renderChart, renderCode, chartName }: BodyContentsType) {
+    const topContentsParam: TopContentsType = {
+      chartName,
+      viewPreview: true,
+    };
+    this.topElement = this.topContentRender(topContentsParam);
+
+    const renderingContainer = document.createElement('div');
+    renderingContainer.className = 'chart-view-container';
+    renderingContainer.insertAdjacentElement('afterbegin', this.topElement);
+
+    const viewBox = document.createElement('div');
+    const codeBox = document.createElement('div');
+    viewBox.className = 'view-box';
+    codeBox.className = 'code-box';
+
+    const canvas = renderChart();
+    viewBox.appendChild(canvas);
+
+    const html = `
       <div class='code'>
         ${renderCode()}
       </div>
-  `;
+    `;
 
-  codeBox.innerHTML = html;
+    codeBox.innerHTML = html;
 
-  renderingContainer.appendChild(viewBox);
-  renderingContainer.appendChild(codeBox);
+    renderingContainer.appendChild(viewBox);
+    renderingContainer.appendChild(codeBox);
 
-  root?.appendChild(renderingContainer);
-}
+    this.root?.appendChild(renderingContainer);
+  }
 
-function UiView() {
-  const header = `<div class='header'>Chart Library</div>`;
+  uiViewRender() {
+    const header = `<div class='header'>Chart Library</div>`;
 
-  chartList.forEach((ele: ViewListParam) => {
-    viewList(ele);
-  });
+    this.viewList.forEach((element: UiViewTypes) => {
+      const topContent = {
+        chartName: element.chartName,
+        viewPreview: element.viewPreview,
+      };
 
-  root?.insertAdjacentHTML('beforebegin', header);
+      const bodyContent: BodyContentsType = {
+        chartName: element.chartName,
+        renderChart: element.renderChart,
+        renderCode: element.renderCode,
+      };
+
+      this.topContentRender(topContent);
+
+      this.bodyContentRender(bodyContent);
+    });
+
+    this.root?.insertAdjacentHTML('beforebegin', header);
+  }
 }
 
 export default UiView;

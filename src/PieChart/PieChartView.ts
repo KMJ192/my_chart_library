@@ -1,6 +1,6 @@
 import PieChart from '.';
 import PieChartParam, { defaultChartValue, PieChartData } from './PieChartTypes';
-import { ViewListParam } from '../viewTypes';
+import { UiViewTypes } from '../viewTypes';
 
 import '../style/UiView.scss';
 
@@ -59,8 +59,9 @@ export const pieChartMockData: PieChartData[] = [
   },
 ];
 
-export const primaryPieChart: ViewListParam = {
+export const primaryPieChart: UiViewTypes = {
   chartName: 'primaryPieChart',
+  viewPreview: true,
   renderChart: (): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
     if (canvas) {
@@ -80,24 +81,24 @@ export const primaryPieChart: ViewListParam = {
   },
   renderCode: (): string => {
     const code = `
-      <pre>
-      const canvas = document.createElement('canvas');
+<pre>
+  const canvas = document.createElement('canvas');
 
-      if (canvas) {
-        const pieChartParam: PieChartParam = {
-          canvas,
-          chartType: 'primary',
-          data: pieChartMockData,
-          totalValue: 5,
-          chartSize: 500,
-        };
-        const pieChart = new PieChart(pieChartParam);
-        pieChart.draw();
-        pieChart.hoverEvent(false);
-      }
-  
-      return canvas;
-      </ pre>
+  if (canvas) {
+    const pieChartParam: PieChartParam = {
+      canvas,
+      chartType: 'primary',
+      data: pieChartMockData,
+      totalValue: 5,
+      chartSize: 500,
+    };
+    const pieChart = new PieChart(pieChartParam);
+    pieChart.draw();
+    pieChart.hoverEvent(false);
+  }
+
+  return canvas;
+</ pre>
     `;
 
     code.replaceAll(' ', '').replaceAll('  ', '');
@@ -106,8 +107,9 @@ export const primaryPieChart: ViewListParam = {
   },
 };
 
-export const donutChart: ViewListParam = {
+export const donutChart: UiViewTypes = {
   chartName: 'donutChart',
+  viewPreview: true,
   renderChart: (): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
 
@@ -133,29 +135,29 @@ export const donutChart: ViewListParam = {
   },
   renderCode: (): string => {
     const code = `
-      <pre>
-      const canvas = document.createElement('canvas');
+<pre>
+  const canvas = document.createElement('canvas');
 
-      if (canvas) {
-        const pieChartParam: PieChartParam = {
-          canvas,
-          chartType: 'donut',
-          data: pieChartMockData,
-          totalValue: 85,
-          chartSize: 500,
-          displayValue: {
-            visible: true,
-            style: 'normal bold 20px serif',
-            color: defaultChartValue.FONT_COLOR,
-          },
-        };
-        const pieChart = new PieChart(pieChartParam);
-        pieChart.draw();
-        pieChart.hoverEvent(false);
-      }
-  
-      return canvas;
-      </ pre>
+  if (canvas) {
+    const pieChartParam: PieChartParam = {
+      canvas,
+      chartType: 'donut',
+      data: pieChartMockData,
+      totalValue: 85,
+      chartSize: 500,
+      displayValue: {
+        visible: true,
+        style: 'normal bold 20px serif',
+        color: defaultChartValue.FONT_COLOR,
+      },
+    };
+    const pieChart = new PieChart(pieChartParam);
+    pieChart.draw();
+    pieChart.hoverEvent(false);
+  }
+
+  return canvas;
+</ pre>
     `;
 
     code.replaceAll(' ', '').replaceAll('  ', '');

@@ -29,6 +29,7 @@
     "postcss-loader": "^6.2.0",
     "prettier": "^2.4.1",
     "sass-loader": "^12.3.0",
+    "style-loader": "^3.3.1",
     "terser-webpack-plugin": "^5.2.4",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.4",
@@ -42,6 +43,6 @@
     "build": "rm -rf build && cross-env NODE_ENV=PRODUCTION webpack --config webpack.prod.js",
     "build:wasm": "cd wasm_module && wasm-pack build",
     "build:view": "cross-env NODE_ENV=VIEW webpack --config webpack.prod.js",
-    "start": "cross-env NODE_ENV=DEVELOPMENT webpack serve --config webpack.dev.js"
+    "start": "cross-env NODE_ENV=DEVELOPMENT webpack-dev-server --config webpack.dev.js"
   }
 }

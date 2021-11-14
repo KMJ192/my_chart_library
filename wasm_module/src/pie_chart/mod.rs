@@ -1,27 +1,9 @@
-pub struct HoverType {
-  chart_color: String,
-  font_color: Option<String>,
-  font_style: Option<String>,
-}
+use std::f64;
+use serde::{Serialize, Deserialize};
 
-pub struct PieChartData {
-  title: Option<String>,
-  value: f64,
-  fill_color: String,
-  hover: Option<HoverType>,
-}
+#[path="./pie_chart_types.rs"] mod types;
 
-pub struct PieChartParam<'a, 'b> {
-  canvas: &'a web_sys::HtmlCanvasElement,
-  ctx: &'b web_sys::CanvasRenderingContext2d,
-  data: PieChartData,
-  chart_fill_color: Option<String>,
-  chart_size: Option<u32>,
-  total_value: Option<u32>
-}
-
-// use std::f64;
-// use serde::{Serialize, Deserialize};
+pub struct PieChart;
 
 // #[derive(Clone, Serialize, Deserialize)]
 // pub struct PieChartData<'title, 'color> {

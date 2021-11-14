@@ -1,8 +1,10 @@
-$container-width: 1200px;
-
 $bolder-black: 2px solid #000000;
 $bolder-black-00: 2px solid rgba(0, 0, 0, 0.3);
 $line-style: 1px solid rgba(0, 0, 0, 0.3);
+
+body {
+  background-color: rgba(139, 139, 139, 0.3);
+}
 
 .header {
   padding: 10px 0px 30px 30px;
@@ -14,41 +16,66 @@ $line-style: 1px solid rgba(0, 0, 0, 0.3);
   display: grid;
   grid-gap: 100px;
   .chart-view-container {
+    background-color: #f1e9e9;
     border: $bolder-black;
-    width: $container-width;
     height: 100%;
-    display: flex;
     padding: 10px;
-    .chart-title {
-      padding: 0;
-      position: absolute;
-      margin-top: 10px;
-      margin-left: 30px;
-      font: bolder 20px sans-serif;
+    .chart-top-content {
+      .chart-title {
+        padding: 0;
+        margin-bottom: 20px;
+        margin-left: 10px;
+        font: bolder 20px sans-serif;
+      }
+      .tabs {
+        display: flex;
+        margin-left: 10px;
+        margin-bottom: 10px;
+        column-gap: 20px;
+        .view {
+          // font: bolder 13px sans-serif;
+          &.tab-button {
+            cursor: pointer;
+          }
+          &.active {
+            font: 900 13px sans-serif;
+          }
+          &.hide {
+            font: 400 13px sans-serif;
+          }
+        }
+        .code {
+          &.tab-button {
+            cursor: pointer;
+          }
+          &.active {
+            font: 900 13px sans-serif;
+          }
+          &.hide {
+            font: 400 13px sans-serif;
+          }
+        }
+      }
     }
     .view-box {
       border: $bolder-black-00;
-      width: $container-width - 700px;
-      margin-right: 10px;
+      display: block;
+      &.hide {
+        display: none;
+      }
     }
     .code-box {
       border: $bolder-black-00;
-      width: $container-width - 500px;
       display: grid;
       font: bolder;
       grid-template-rows: minmax(50px, auto) 100%;
-      .explanation {
-        padding-bottom: 10px;
-        padding-left: 10px;
-        font: bolder 20px sans-serif;
-        border-bottom: $line-style;
-        vertical-align: middle;
-        height: 50px;
-        line-height: 50px;
+      display: block;
+      &.hide {
+        display: none;
       }
       .code {
         overflow: auto;
-        padding: 10px 5px 10px 5px;
+        padding: 10px 0px 10px 5px;
         font: bolder 13px sans-serif;
         &::-webkit-scrollbar {
           width: 3px;

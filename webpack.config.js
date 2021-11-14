@@ -51,18 +51,18 @@ module.exports = {
         oneOf: [
           {
             test: /\.module\.s[ac]ss$/,
-            use: [MiniCssExtractPlugin.loader, cssLoader, postcssLoader, 'sass-loader'],
+            use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', cssLoader, postcssLoader, 'sass-loader'],
             exclude: /node_modules/,
           },
           {
-            use: [MiniCssExtractPlugin.loader, 'css-loader', postcssLoader, 'sass-loader'],
+            use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader', postcssLoader, 'sass-loader'],
             exclude: /node_modules/,
           },
         ],
       },
       {
         test: /\.css$/i,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader'],
         exclude: /node_modules/,
       },
     ],
@@ -83,6 +83,7 @@ module.exports = {
           }
         : false,
     }),
+    new webpack.HotModuleReplacementPlugin(),
     new ForkTsCheckerWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[contenthash].css',

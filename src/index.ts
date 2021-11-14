@@ -1,4 +1,9 @@
-import UiView from './UiView';
+import UiView, { chartList } from './UiView';
 import './style/style.css';
 
-UiView();
+const param = {
+  eleId: 'root',
+  viewList: chartList,
+};
+const uiView = new UiView(param);
+uiView.uiViewRender();
