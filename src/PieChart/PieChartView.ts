@@ -61,7 +61,7 @@ export const pieChartMockData: PieChartData[] = [
 
 export const primaryPieChart: UiViewTypes = {
   chartName: 'primaryPieChart',
-  viewPreview: true,
+  viewPreview: 'preview',
   renderChart: (): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
     if (canvas) {
@@ -109,7 +109,7 @@ export const primaryPieChart: UiViewTypes = {
 
 export const donutChart: UiViewTypes = {
   chartName: 'donutChart',
-  viewPreview: true,
+  viewPreview: 'preview',
   renderChart: (): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
 
