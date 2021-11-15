@@ -31,6 +31,7 @@ class PieChart {
     height: number;
   };
 
+  // 중앙에 출력하는 value
   private displayValue?: {
     visible?: boolean;
     color?: string;

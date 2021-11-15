@@ -4,7 +4,7 @@ import { ViewListParam, UiViewTypes, ToggleType } from './viewTypes';
 import './style/UiView.scss';
 
 export const root = document.getElementById('root');
-export const chartList: UiViewTypes[] = [primaryPieChart, donutChart];
+export const chartList: UiViewTypes[] = [donutChart, primaryPieChart];
 
 export class UiView {
   private root: HTMLElement | null;
@@ -108,7 +108,7 @@ export class UiView {
     renderingContainer.appendChild(viewBox);
     renderingContainer.appendChild(codeBox);
 
-    this.root?.appendChild(renderingContainer);
+    this.root?.insertAdjacentElement('afterbegin', renderingContainer);
   }
 
   uiViewRender() {
@@ -161,8 +161,8 @@ export class UiView {
       findContainer(node);
 
       if (container !== null && container !== this.root?.id) {
-        const tmp = (container as Element).childNodes;
-        tmp.forEach((element: Node) => {
+        const childNodes = (container as Element).childNodes;
+        childNodes.forEach((element: Node) => {
           const ele = element as Element;
           const classList = ele.classList;
           for (let i = 0; i < classList.length; i++) {
