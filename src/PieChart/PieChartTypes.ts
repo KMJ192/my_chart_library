@@ -13,7 +13,7 @@ export default interface PieChartParam {
 }
 
 export interface TextType {
-  text: string;
+  text: any | any[];
   visible?: boolean;
   color?: string;
   style?: string;

@@ -61,8 +61,6 @@ class PieChart {
 
     canvas.height = chartSize || defaultChartValue.CHART_SIZE;
 
-    this.canvas = canvas;
-
     this.chartType = chartType || pieChartType.PRIMARY;
 
     this.inputData = data;
