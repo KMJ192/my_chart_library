@@ -27,14 +27,15 @@ pub struct PieChart {
   chart_hovered: bool
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PieChartParam {
-  ele_id: String,
-  chart_type: Option<String>,
-  input_data: Vec<PieChartData>,
-  chart_size: Option<u32>,
-  total_value: Option<f64>,
-  chart_fill_color: Option<String>,
-  display_value_to_center: Option<DisplayValueType>,
+  pub ele_id: String,
+  pub chart_type: Option<String>,
+  pub input_data: Vec<PieChartData>,
+  pub chart_size: Option<u32>,
+  pub total_value: Option<f64>,
+  pub chart_fill_color: Option<String>,
+  pub display_value_to_center: Option<DisplayValueType>,
 }
 
 impl PieChart {

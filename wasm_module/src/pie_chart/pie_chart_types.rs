@@ -1,13 +1,13 @@
-// use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
-// #[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct HoverType {
   chart_color: String,
   font_color: Option<String>,
   font_style: Option<String>,
 }
 
-// #[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct TextType {
   text: String,
   visible: Option<bool>,
@@ -25,7 +25,7 @@ pub struct PositionType {
   y: i32,
 }
 
-// #[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PieChartData {
   title: Option<TextType>,
   value: f64,
@@ -48,9 +48,9 @@ pub struct PieChartEachArea {
   hover: Option<HoverType>
 }
 
-// #[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct DisplayValueType {
-  visible: Option<bool>,
-  color: Option<String>,
-  style: Option<String>,
+  visible: bool,
+  color: String,
+  style: String,
 }
