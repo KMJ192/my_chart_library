@@ -6,3 +6,4 @@ target
 yarn.lock
 yarn-error.log
 pkg
+.vscode
