@@ -19,3 +19,9 @@ declare module '*.module.sass' {
 }
 
 declare module '@wasm';
+
+// declare global {
+//   interface LineChart {
+//     getLongestValueWidth: () => void;
+//   }
+// }

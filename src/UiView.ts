@@ -2,9 +2,10 @@ import { primaryPieChart, donutChart } from './PieChart/PieChartView';
 import { ViewListParam, UiViewTypes, ToggleType } from './viewTypes';
 
 import './style/UiView.scss';
+import { primaryLineChart } from './LineChart/LineChartView';
 
 export const root = document.getElementById('root');
-export const chartList: UiViewTypes[] = [donutChart, primaryPieChart];
+export const chartList: UiViewTypes[] = [primaryLineChart, donutChart, primaryPieChart];
 
 export class UiView {
   private root: HTMLElement | null;
