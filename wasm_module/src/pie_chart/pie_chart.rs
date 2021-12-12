@@ -8,8 +8,16 @@ use super::document::document_object::*;
 #[path="./pie_chart_types.rs"] pub mod pie_chart_types;
 use pie_chart_types::*;
 
-pub struct PieChart {
-  canvas: Option<HtmlCanvasElement>,
+// #[derive(Clone, Serialize, Deserialize)]
+// pub struct PieChartParam<'a> {
+//   canvas: Option<&'a HtmlCanvasElement>,
+//   chart_type: String,
+//   data: Vec<PieChartData>,
+//   chart_fill_color: Option<String>
+// }
+
+pub struct PieChart<'a> {
+  canvas: Option<&'a HtmlCanvasElement>,
   ctx: Option<CanvasRenderingContext2d>,
   chart_type: String,
   input_data: Vec<PieChartData>,
@@ -27,18 +35,7 @@ pub struct PieChart {
   chart_hovered: bool
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct PieChartParam {
-  pub ele_id: String,
-  pub chart_type: Option<String>,
-  pub input_data: Vec<PieChartData>,
-  pub chart_size: Option<u32>,
-  pub total_value: Option<f64>,
-  pub chart_fill_color: Option<String>,
-  pub display_value_to_center: Option<DisplayValueType>,
-}
-
-impl PieChart {
+impl<'a> PieChart<'a> {
   pub fn new() -> Self {
     PieChart {
       canvas: None,
@@ -59,59 +56,7 @@ impl PieChart {
       chart_hovered: false,
     }
   }
-  pub fn init(&mut self, param: PieChartParam) {
-    // set canvas
-    let ele_id: String = param.ele_id;
-    let mut document = DocumentMethod::new();
-    document.set_document();
-    let canvas = document.document_set_html_canvas(ele_id);
+  // pub fn init(&mut self, param: PieChartParam) {
 
-    self.canvas = canvas;
-
-    // set canvas info(size, 2d context)
-    let mut width: u32 = 0;
-    let mut height: u32 = 0;
-    if let Some(chart_size) = param.chart_size {
-      width = chart_size;
-      height = chart_size;
-    };
-
-    if let Some(canvas) = &self.canvas {
-      let ctx: CanvasRenderingContext2d = canvas.get_context("2d")
-                                            .unwrap()
-                                            .unwrap()
-                                            .dyn_into::<CanvasRenderingContext2d>()
-                                            .unwrap();
-      self.ctx = Some(ctx);
-      canvas.set_width(width);
-      canvas.set_height(height);
-    }
-
-    // set input data
-    self.input_data = param.input_data;
-
-    // chart_type save
-    if let Some(chart_type) = param.chart_type {
-      self.chart_type = chart_type;
-    } else {
-      self.chart_type = String::from("primary");
-    }
-    
-    // chart color 설정
-    if let Some(chart_fill_color) = param.chart_fill_color {
-      self.chart_fill_color = chart_fill_color;
-    } else {
-      self.chart_fill_color = String::from("'rgb(230, 230, 230)'");
-    }
-
-    // total value 설정
-    if let Some(total_value) = param.total_value {
-      self.total_value = total_value;
-    }
-
-    // display value to center
-    if let Some(display_value_to_center) = param.display_value_to_center {
-      self.display_value_to_center = Some(display_value_to_center);
-    }
-  }
+  // }
 }

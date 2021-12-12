@@ -16,9 +16,22 @@ pub mod document;
 
 use pie_chart::{render_chart::*, types::*};
 
+#[derive(Clone, Serialize, Deserialize)]
+struct PieChartParam {
+  id: String,
+  chart_size: i32,
+  chart_type: String,
+  data: PieChartData,
+  total_value: i32
+}
+
 #[wasm_bindgen]
-pub fn pie_chart_module(){
+pub fn pie_chart_module(param: &JsValue) {
+  // console::log_1(&param.into());
+  let p: PieChartParam = param.into_serde().unwrap();
   
+  // println!("{:?}", p);
+
   // let test: PieChartParam = PieChartParam {
   //   ele_id: "",
   //   chart_type: None,

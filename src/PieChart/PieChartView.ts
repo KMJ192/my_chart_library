@@ -72,9 +72,10 @@ export const primaryPieChart: UiViewTypes = {
         totalValue: 50,
         chartSize: 500,
       };
-      const pieChart = new PieChart(pieChartParam);
-      pieChart.draw();
-      pieChart.hoverEvent(false);
+      // const pieChart = new PieChart(pieChartParam);
+      // pieChart.draw();
+      // pieChart.hoverEvent(false);
+      import('@wasm').then((wasm_module: any) => wasm_module.pie_chart_module(pieChartParam));
     }
 
     return canvas;

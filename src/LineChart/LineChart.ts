@@ -50,11 +50,15 @@ class LineChart {
   private scaleY: number;
 
   constructor(param: LineChartParam) {
-    const { canvas, minXAxis, minYAxis, maxXAxis, maxYAxis, unitsPerTickX, unitsPerTickY } = param;
+    const { canvas, chartSize, minXAxis, minYAxis, maxXAxis, maxYAxis, unitsPerTickX, unitsPerTickY } = param;
 
     this.canvas = canvas;
 
     this.ctx = this.canvas.getContext('2d');
+
+    this.canvas.width = chartSize?.chartWidth || 100;
+
+    this.canvas.height = chartSize?.chartHeigth || 50;
 
     this.minXAxis = minXAxis;
 
@@ -119,11 +123,46 @@ class LineChart {
   }
 
   private getLongestValueWidth(): number {
-    return 0;
+    if (this.ctx === null) return 0;
+    this.ctx.font = this.font;
+    let longestValueWidth: number = 0;
+    for (let n = 0; n < this.numYTicks; n++) {
+      const value = String(this.maxYAxis - n * this.unitsPerTickY);
+      longestValueWidth = Math.max(longestValueWidth, this.ctx.measureText(value).width);
+    }
+    return longestValueWidth;
+  }
+
+  private drawXAxis() {
+    const { ctx, x, y, width, height, axisColor, numXTicks } = this;
+    if (ctx === null) return;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x, y + height - 10);
+    ctx.lineTo(x + width, y + height - 10);
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  private displayCalc() {
+    console.log(`rangeX: ${this.rangeX}`);
+    console.log(`rangeY: ${this.rangeY}`);
+    console.log(`numXTicks: ${this.numXTicks}`);
+    console.log(`numYTicks ${this.numYTicks}`);
+    console.log(`x: ${this.x}`);
+    console.log(`y: ${this.y}`);
+    console.log(`width: ${this.width}`);
+    console.log(`height: ${this.height}`);
+    console.log(`scaleX: ${this.scaleX}`);
+    console.log(`scaleY: ${this.scaleY}`);
   }
 
   public draw() {
+    if (this.ctx === null) return;
     this.calcRelation();
+    // this.displayCalc();
+    this.drawXAxis();
   }
 }
 

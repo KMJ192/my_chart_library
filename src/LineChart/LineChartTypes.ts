@@ -1,5 +1,9 @@
 interface LineChartParam {
   canvas: HTMLCanvasElement;
+  chartSize?: {
+    chartWidth?: number;
+    chartHeigth?: number;
+  };
   minXAxis: number;
   minYAxis: number;
   maxXAxis: number;
