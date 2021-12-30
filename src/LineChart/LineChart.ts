@@ -74,11 +74,6 @@ class LineChart {
     this.title = data?.title || '';
 
     /**
-     * chart data
-     */
-    this.data = data?.data.sort((a, b) => a.x - b.x) || [];
-
-    /**
      * visible tooltip
      */
     this.tootip = data?.tooltip || false;
@@ -93,25 +88,30 @@ class LineChart {
      */
     this.canvas.height = height || 300;
 
-    /**
-     * x축 최소값 설정
-     */
-    this.minXAxis = minXAxis || (this.data && this.data[0].x) || 0;
-
+    // y축 기준으로 먼저 정렬해야 됨
+    // y값 최대, 최소값을 얻기위해 y축 정렬
+    this.data = data?.data.sort((a, b) => a.y - b.y) || [];
     /**
      * y축 최소값 설정
      */
     this.minYAxis = minYAxis || (this.data && this.data[0].y) || 0;
 
     /**
-     * x축 최대값 설정
-     */
-    this.maxXAxis = maxXAxis || (this.data && this.data[this.data.length - 1].x) || 0;
-
-    /**
      * y축 최대값 설정
      */
     this.maxYAxis = maxYAxis || (this.data && this.data[this.data.length - 1].y) || 0;
+
+    // x값 최대, 최소값 얻기위해 x축 정렬
+    this.data = data?.data.sort((a, b) => a.x - b.x) || [];
+    /**
+     * x축 최소값 설정
+     */
+    this.minXAxis = minXAxis || (this.data && this.data[0].x) || 0;
+
+    /**
+     * x축 최대값 설정
+     */
+    this.maxXAxis = maxXAxis || (this.data && this.data[this.data.length - 1].x) || 0;
 
     /**
      * x축 tick당 값 설정
@@ -236,6 +236,53 @@ class LineChart {
     ctx.restore();
   }
 
+  private drawYAxis() {
+    const { ctx, x, y, axisColor, numYTicks, height, tickSize } = this;
+    if (ctx === null) return;
+    ctx.save();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = axisColor;
+    ctx.lineWidth = 1;
+    ctx.moveTo(x + 10, y + height);
+    ctx.lineTo(x + 10, y);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.strokeStyle = axisColor;
+    for (let i = 0; i < numYTicks; i++) {
+      const tmpY = (i * height) / numYTicks + y;
+      ctx.beginPath();
+      ctx.moveTo(this.x, tmpY);
+      ctx.lineTo(x + tickSize, tmpY);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  private drawYLabel() {
+    const { ctx, x, y, font, padding, numYTicks, maxYAxis, height } = this;
+    if (ctx === null) return;
+
+    ctx.save();
+    ctx.font = font;
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < numYTicks; i++) {
+      const value = Math.round(maxYAxis - (i * maxYAxis) / numYTicks);
+      ctx.save();
+      ctx.translate(x - padding, (i * height) / numYTicks + y);
+      ctx.fillText(String(value), 0, 0);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
   private displayCalc() {
     console.log(`rangeX: ${this.rangeX}`);
     console.log(`rangeY: ${this.rangeY}`);
@@ -254,6 +301,8 @@ class LineChart {
     // this.displayCalc();
     this.drawXAxis();
     this.drawXLabel();
+    this.drawYAxis();
+    this.drawYLabel();
   }
 }
 

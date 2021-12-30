@@ -42,7 +42,7 @@ const lineChartMockData = {
     },
     {
       x: 170,
-      y: 100,
+      y: 15,
     },
   ],
 };
