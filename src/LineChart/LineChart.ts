@@ -1,9 +1,15 @@
-import { LineChartParam } from './LineChartTypes';
+import { LineChartParam, DataType } from './LineChartTypes';
 
 class LineChart {
   private canvas: HTMLCanvasElement;
 
   private ctx: CanvasRenderingContext2D | null;
+
+  private title: string;
+
+  private data: DataType[] | null;
+
+  private tootip: boolean;
 
   private minXAxis: number;
 
@@ -50,40 +56,95 @@ class LineChart {
   private scaleY: number;
 
   constructor(param: LineChartParam) {
-    const { canvas, chartSize, minXAxis, minYAxis, maxXAxis, maxYAxis, unitsPerTickX, unitsPerTickY } = param;
+    const { canvas, data, width, height, minXAxis, minYAxis, maxXAxis, maxYAxis, unitsPerTickX, unitsPerTickY } = param;
 
+    /**
+     * canvas element
+     */
     this.canvas = canvas;
 
+    /**
+     * canvas 2d context
+     */
     this.ctx = this.canvas.getContext('2d');
 
-    this.canvas.width = chartSize?.chartWidth || 100;
+    /**
+     * chart 타이틀
+     */
+    this.title = data?.title || '';
 
-    this.canvas.height = chartSize?.chartHeigth || 50;
+    /**
+     * chart data
+     */
+    this.data = data?.data.sort((a, b) => a.x - b.x) || [];
 
-    this.minXAxis = minXAxis;
+    /**
+     * visible tooltip
+     */
+    this.tootip = data?.tooltip || false;
 
-    this.minYAxis = minYAxis;
+    /**
+     * setting canvas width
+     */
+    this.canvas.width = width || 500;
 
-    this.maxXAxis = maxXAxis;
+    /**
+     * setting canvas height
+     */
+    this.canvas.height = height || 300;
 
-    this.maxYAxis = maxYAxis;
+    /**
+     * x축 최소값 설정
+     */
+    this.minXAxis = minXAxis || (this.data && this.data[0].x) || 0;
 
-    this.unitsPerTickX = unitsPerTickX;
+    /**
+     * y축 최소값 설정
+     */
+    this.minYAxis = minYAxis || (this.data && this.data[0].y) || 0;
 
-    this.unitsPerTickY = unitsPerTickY;
+    /**
+     * x축 최대값 설정
+     */
+    this.maxXAxis = maxXAxis || (this.data && this.data[this.data.length - 1].x) || 0;
+
+    /**
+     * y축 최대값 설정
+     */
+    this.maxYAxis = maxYAxis || (this.data && this.data[this.data.length - 1].y) || 0;
+
+    /**
+     * x축 tick당 값 설정
+     */
+    this.unitsPerTickX = unitsPerTickX || 10;
+
+    /**
+     * y축 tick당 값 설정
+     */
+    this.unitsPerTickY = unitsPerTickY || 10;
 
     this.padding = 10;
 
+    /**
+     * tick 표시 선 길이
+     */
     this.tickSize = 10;
 
+    /**
+     * 축 색상 설정
+     */
     this.axisColor = '#555';
 
     this.pointRadius = 5;
 
-    this.font = '12pt Calibri';
+    /**
+     * font 설정
+     */
+    this.font = 'normal bold 12px serif';
 
     this.fontHeight = 12;
 
+    // initialize
     this.x = 0;
 
     this.y = 0;
@@ -134,7 +195,7 @@ class LineChart {
   }
 
   private drawXAxis() {
-    const { ctx, x, y, width, height, axisColor, numXTicks } = this;
+    const { ctx, x, y, width, height, axisColor, numXTicks, tickSize } = this;
     if (ctx === null) return;
     ctx.save();
     ctx.beginPath();
@@ -143,6 +204,36 @@ class LineChart {
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 1;
     ctx.stroke();
+
+    for (let i = 0; i < numXTicks; i++) {
+      const tmpX = ((i + 1) * width) / numXTicks + x;
+      const tmpY = y + height;
+      ctx.beginPath();
+      ctx.moveTo(tmpX, tmpY);
+      ctx.lineTo(tmpX, tmpY - tickSize);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  private drawXLabel() {
+    const { ctx, width, height, x, y, padding, font, numXTicks, maxXAxis } = this;
+    if (ctx === null) return;
+    ctx.save();
+
+    ctx.font = font;
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < numXTicks; i++) {
+      const label = Math.round(((i + 1) * maxXAxis) / numXTicks);
+      ctx.save();
+      ctx.translate(((i + 1) * width) / numXTicks + x, y + height + padding);
+      ctx.fillText(String(label), 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
   }
 
   private displayCalc() {
@@ -159,10 +250,10 @@ class LineChart {
   }
 
   public draw() {
-    if (this.ctx === null) return;
     this.calcRelation();
     // this.displayCalc();
     this.drawXAxis();
+    this.drawXLabel();
   }
 }
 

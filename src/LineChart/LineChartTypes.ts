@@ -1,19 +1,25 @@
-interface LineChartParam {
-  canvas: HTMLCanvasElement;
-  chartSize?: {
-    chartWidth?: number;
-    chartHeigth?: number;
-  };
-  minXAxis: number;
-  minYAxis: number;
-  maxXAxis: number;
-  maxYAxis: number;
-  unitsPerTickX: number;
-  unitsPerTickY: number;
+interface DataType {
+  x: number;
+  y: number;
 }
 
 interface LineChartData {
   title?: string;
+  tooltip?: boolean;
+  data: DataType[];
 }
 
-export { LineChartParam };
+interface LineChartParam {
+  canvas: HTMLCanvasElement;
+  width?: number;
+  height?: number;
+  minXAxis?: number;
+  minYAxis?: number;
+  maxXAxis?: number;
+  maxYAxis?: number;
+  unitsPerTickX?: number;
+  unitsPerTickY?: number;
+  data?: LineChartData;
+}
+
+export { LineChartParam, LineChartData, DataType };
