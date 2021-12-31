@@ -1,8 +1,9 @@
 import { UiViewTypes } from '../viewTypes';
 
-import '../style/UiView.scss';
-import LineChart from '.';
+import LineChart from './LineChart';
 import { LineChartParam } from './LineChartTypes';
+
+import '../style/UiView.scss';
 
 const lineChartMockData = {
   title: 'LineChart',

@@ -200,8 +200,8 @@ class LineChart {
     if (ctx === null) return;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(x, y + height - 10);
-    ctx.lineTo(x + width, y + height - 10);
+    ctx.moveTo(x, y + height);
+    ctx.lineTo(x + width, y + height);
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -246,8 +246,8 @@ class LineChart {
     ctx.beginPath();
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 1;
-    ctx.moveTo(x + 10, y + height);
-    ctx.lineTo(x + 10, y);
+    ctx.moveTo(x, y + height);
+    ctx.lineTo(x, y);
     ctx.stroke();
     ctx.restore();
 
@@ -284,6 +284,38 @@ class LineChart {
     ctx.restore();
   }
 
+  private drawLine() {
+    const { ctx, data, x, y, width, height, scaleX, scaleY, pointRadius } = this;
+    if (ctx === null || !data) return;
+    ctx.save();
+
+    // transform context
+    ctx.translate(x, y + height);
+    ctx.scale(1, -1);
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'blue';
+    ctx.fillStyle = 'blue';
+    ctx.beginPath();
+    ctx.moveTo(data[0].x * scaleX, data[0].y * scaleY);
+
+    for (let i = 0; i < data.length; i++) {
+      const point = data[i];
+
+      ctx.lineTo(point.x * this.scaleX, point.y * scaleY);
+      ctx.stroke();
+      ctx.closePath();
+      ctx.beginPath();
+      ctx.arc(point.x * this.scaleX, point.y * this.scaleY, this.pointRadius, 0, 2 * Math.PI, false);
+      ctx.fill();
+      ctx.closePath();
+
+      ctx.beginPath();
+      ctx.moveTo(point.x * scaleX, point.y * scaleY);
+    }
+    ctx.restore();
+  }
+
   private displayCalc() {
     console.log(`rangeX: ${this.rangeX}`);
     console.log(`rangeY: ${this.rangeY}`);
@@ -304,6 +336,7 @@ class LineChart {
     this.drawXLabel();
     this.drawYAxis();
     this.drawYLabel();
+    this.drawLine();
   }
 }
 
