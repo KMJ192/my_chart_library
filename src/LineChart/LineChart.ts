@@ -1,5 +1,6 @@
 import { LineChartParam, DataType } from './LineChartTypes';
 
+// push test
 class LineChart {
   private canvas: HTMLCanvasElement;
 
