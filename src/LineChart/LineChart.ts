@@ -1,4 +1,4 @@
-import { LineChartParam, DataType } from './LineChartTypes';
+import { LineChartParam, DataType, DrawParam } from './LineChartTypes';
 
 // push test
 class LineChart {
@@ -8,9 +8,9 @@ class LineChart {
 
   private title: string;
 
-  private data: DataType[] | null;
-
   private tootip: boolean;
+
+  private data: DataType[] | any;
 
   private minXAxis: number;
 
@@ -56,8 +56,25 @@ class LineChart {
 
   private scaleY: number;
 
+  private xAxisSelector: string;
+
+  private yAxisSelector: string;
+
   constructor(param: LineChartParam) {
-    const { canvas, data, width, height, minXAxis, minYAxis, maxXAxis, maxYAxis, unitsPerTickX, unitsPerTickY } = param;
+    const {
+      canvas,
+      data,
+      width,
+      height,
+      minXAxis,
+      minYAxis,
+      maxXAxis,
+      maxYAxis,
+      unitsPerTickX,
+      unitsPerTickY,
+      axisColor,
+      pointRadius,
+    } = param;
 
     /**
      * canvas element
@@ -89,41 +106,29 @@ class LineChart {
      */
     this.canvas.height = height || 300;
 
-    // y축 기준으로 먼저 정렬해야 됨
-    // y값 최대, 최소값을 얻기위해 y축 정렬
-    this.data = data?.data.sort((a, b) => a.y - b.y) || [];
-    /**
-     * y축 최소값 설정
-     */
-    this.minYAxis = minYAxis || (this.data && this.data[0].y) || 0;
+    this.data = data?.data || [];
 
-    /**
-     * y축 최대값 설정
-     */
-    this.maxYAxis = maxYAxis || (this.data && this.data[this.data.length - 1].y) || 0;
+    this.maxXAxis = maxXAxis || 0;
 
-    // x값 최대, 최소값 얻기위해 x축 정렬
-    this.data = data?.data.sort((a, b) => a.x - b.x) || [];
-    /**
-     * x축 최소값 설정
-     */
-    this.minXAxis = minXAxis || (this.data && this.data[0].x) || 0;
+    this.minXAxis = minXAxis || 0;
 
-    /**
-     * x축 최대값 설정
-     */
-    this.maxXAxis = maxXAxis || (this.data && this.data[this.data.length - 1].x) || 0;
+    this.maxYAxis = maxYAxis || 0;
+
+    this.minYAxis = minYAxis || 0;
 
     /**
      * x축 tick당 값 설정
      */
-    this.unitsPerTickX = unitsPerTickX || 10;
+    this.unitsPerTickX = unitsPerTickX || 5;
 
     /**
      * y축 tick당 값 설정
      */
-    this.unitsPerTickY = unitsPerTickY || 10;
+    this.unitsPerTickY = unitsPerTickY || 5;
 
+    /**
+     * canvas padding 설정
+     */
     this.padding = 10;
 
     /**
@@ -134,9 +139,12 @@ class LineChart {
     /**
      * 축 색상 설정
      */
-    this.axisColor = '#555';
+    this.axisColor = axisColor || '#555';
 
-    this.pointRadius = 5;
+    /**
+     * linechart point 크기
+     */
+    this.pointRadius = pointRadius || 0;
 
     /**
      * font 설정
@@ -165,38 +173,67 @@ class LineChart {
     this.scaleX = 0;
 
     this.scaleY = 0;
+
+    /**
+     * data selector 설정
+     */
+    this.xAxisSelector = data?.xAxisSelector || 'line_x';
+
+    this.yAxisSelector = data?.yAxisSelector || 'line_y';
   }
 
   private calcRelation() {
-    const { maxXAxis, maxYAxis, minYAxis, unitsPerTickX, unitsPerTickY, padding } = this;
+    const { canvas, fontHeight, tickSize, unitsPerTickX, unitsPerTickY, padding, xAxisSelector, yAxisSelector } = this;
 
-    this.rangeX = maxXAxis - minYAxis;
-    this.rangeY = maxYAxis - minYAxis;
+    // y축 최대/최소값 저장
+    const dataLen = this.data.length;
+    if (dataLen > 0 && this.data[0][xAxisSelector] !== undefined) {
+      this.data.sort((a: any, b: any) => a[yAxisSelector] - b[yAxisSelector]);
+      this.minYAxis = this.data[0][yAxisSelector];
+      this.maxYAxis = this.data[dataLen - 1][yAxisSelector];
+    } else {
+      this.minYAxis = 0;
+      this.maxYAxis = dataLen - 1;
+    }
+
+    // x축 최대/최소값 저장
+    if (dataLen > 0 && this.data[0][xAxisSelector] !== undefined) {
+      this.data.sort((a: any, b: any) => a[xAxisSelector] - b[xAxisSelector]);
+      this.minXAxis = this.data[0][xAxisSelector];
+      this.maxXAxis = this.data[dataLen - 1][xAxisSelector];
+    } else {
+      this.minXAxis = 0;
+      this.maxXAxis = dataLen - 1;
+    }
+
+    this.rangeX = this.maxXAxis - this.minYAxis;
+    this.rangeY = this.maxYAxis - this.minYAxis;
 
     this.numXTicks = Math.round(this.rangeX / unitsPerTickX);
     this.numYTicks = Math.round(this.rangeY / unitsPerTickY);
 
     this.x = this.getLongestValueWidth() + padding * 2;
     this.y = padding * 2;
-    this.width = this.canvas.width - this.x - padding * 2;
-    this.height = this.canvas.height - this.y - padding - this.fontHeight;
+    this.width = canvas.width - this.x - padding * 2 - tickSize;
+    this.height = canvas.height - this.y - padding - fontHeight - tickSize;
     this.scaleX = this.width / this.rangeX;
     this.scaleY = this.height / this.rangeY;
   }
 
   private getLongestValueWidth(): number {
     if (this.ctx === null) return 0;
-    this.ctx.font = this.font;
+    const { ctx, font, numYTicks, maxYAxis, unitsPerTickY } = this;
+    ctx.font = font;
     let longestValueWidth: number = 0;
-    for (let n = 0; n < this.numYTicks; n++) {
-      const value = String(this.maxYAxis - n * this.unitsPerTickY);
-      longestValueWidth = Math.max(longestValueWidth, this.ctx.measureText(value).width);
+    for (let n = 0; n < numYTicks; n++) {
+      const value = String(maxYAxis - n * unitsPerTickY);
+      longestValueWidth = Math.max(longestValueWidth, ctx.measureText(value).width);
     }
     return longestValueWidth;
   }
 
   private drawXAxis() {
-    const { ctx, x, y, width, height, axisColor, numXTicks, tickSize } = this;
+    const { ctx, x, y, width, height, axisColor } = this;
     if (ctx === null) return;
     ctx.save();
     ctx.beginPath();
@@ -205,21 +242,27 @@ class LineChart {
     ctx.strokeStyle = axisColor;
     ctx.lineWidth = 1;
     ctx.stroke();
+    ctx.restore();
+  }
 
+  private drawXTick() {
+    if (this.ctx === null) return;
+    const { ctx, numXTicks, tickSize, x, y, width, height } = this;
+    ctx.save();
     for (let i = 0; i < numXTicks; i++) {
       const tmpX = ((i + 1) * width) / numXTicks + x;
       const tmpY = y + height;
       ctx.beginPath();
       ctx.moveTo(tmpX, tmpY);
-      ctx.lineTo(tmpX, tmpY - tickSize);
+      ctx.lineTo(tmpX, tmpY + tickSize);
       ctx.stroke();
     }
     ctx.restore();
   }
 
-  private drawXLabel() {
-    const { ctx, width, height, x, y, padding, font, numXTicks, maxXAxis } = this;
-    if (ctx === null) return;
+  private drawXValue() {
+    if (this.ctx === null) return;
+    const { ctx, width, height, x, y, padding, font, numXTicks, maxXAxis, tickSize } = this;
     ctx.save();
 
     ctx.font = font;
@@ -230,7 +273,7 @@ class LineChart {
     for (let i = 0; i < numXTicks; i++) {
       const label = Math.round(((i + 1) * maxXAxis) / numXTicks);
       ctx.save();
-      ctx.translate(((i + 1) * width) / numXTicks + x, y + height + padding);
+      ctx.translate(((i + 1) * width) / numXTicks + x, y + height + padding + tickSize);
       ctx.fillText(String(label), 0, 0);
       ctx.restore();
     }
@@ -238,7 +281,7 @@ class LineChart {
   }
 
   private drawYAxis() {
-    const { ctx, x, y, axisColor, numYTicks, height, tickSize } = this;
+    const { ctx, x, y, axisColor, height } = this;
     if (ctx === null) return;
     ctx.save();
 
@@ -249,21 +292,25 @@ class LineChart {
     ctx.moveTo(x, y + height);
     ctx.lineTo(x, y);
     ctx.stroke();
-    ctx.restore();
-
-    ctx.strokeStyle = axisColor;
-    for (let i = 0; i < numYTicks; i++) {
-      const tmpY = (i * height) / numYTicks + y;
-      ctx.beginPath();
-      ctx.moveTo(this.x, tmpY);
-      ctx.lineTo(x + tickSize, tmpY);
-      ctx.stroke();
-    }
 
     ctx.restore();
   }
 
-  private drawYLabel() {
+  private drawYTick() {
+    if (this.ctx === null) return;
+    const { ctx, height, numYTicks, x, y, tickSize } = this;
+    ctx.save();
+    for (let i = 0; i < numYTicks; i++) {
+      const tmpY = (i * height) / numYTicks + y;
+      ctx.beginPath();
+      ctx.moveTo(this.x, tmpY);
+      ctx.lineTo(x - tickSize, tmpY);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  private drawYValue() {
     const { ctx, x, y, font, padding, numYTicks, maxYAxis, height } = this;
     if (ctx === null) return;
 
@@ -276,7 +323,7 @@ class LineChart {
     for (let i = 0; i < numYTicks; i++) {
       const value = Math.round(maxYAxis - (i * maxYAxis) / numYTicks);
       ctx.save();
-      ctx.translate(x - padding, (i * height) / numYTicks + y);
+      ctx.translate(x - padding - this.tickSize / 2, (i * height) / numYTicks + y);
       ctx.fillText(String(value), 0, 0);
       ctx.restore();
     }
@@ -285,7 +332,7 @@ class LineChart {
   }
 
   private drawLine() {
-    const { ctx, data, x, y, width, height, scaleX, scaleY, pointRadius } = this;
+    const { ctx, data, x, y, height, scaleX, scaleY, xAxisSelector, yAxisSelector, pointRadius } = this;
     if (ctx === null || !data) return;
     ctx.save();
 
@@ -297,45 +344,67 @@ class LineChart {
     ctx.strokeStyle = 'blue';
     ctx.fillStyle = 'blue';
     ctx.beginPath();
-    ctx.moveTo(data[0].x * scaleX, data[0].y * scaleY);
+    const startX = data[0][xAxisSelector] || 0;
+    const startY = data[0][yAxisSelector] || 0;
+    ctx.moveTo(startX, startY);
 
     for (let i = 0; i < data.length; i++) {
       const point = data[i];
+      if (point[xAxisSelector] === undefined) ctx.lineTo(i * scaleX, point[yAxisSelector] * scaleY);
+      else ctx.lineTo(point[xAxisSelector] * scaleX, point[yAxisSelector] * scaleY);
 
-      ctx.lineTo(point.x * this.scaleX, point.y * scaleY);
       ctx.stroke();
       ctx.closePath();
-      ctx.beginPath();
-      ctx.arc(point.x * this.scaleX, point.y * this.scaleY, this.pointRadius, 0, 2 * Math.PI, false);
-      ctx.fill();
-      ctx.closePath();
+
+      // 포인트 찍기
+      if (pointRadius > 0) {
+        ctx.beginPath();
+        ctx.arc(point[xAxisSelector] * scaleX, point[yAxisSelector] * scaleY, this.pointRadius, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.closePath();
+      }
 
       ctx.beginPath();
-      ctx.moveTo(point.x * scaleX, point.y * scaleY);
+      if (point[xAxisSelector] === undefined) ctx.moveTo(i * scaleX, point[yAxisSelector] * scaleY);
+      else ctx.moveTo(point[xAxisSelector] * scaleX, point[yAxisSelector] * scaleY);
     }
     ctx.restore();
   }
 
-  private displayCalc() {
-    console.log(`rangeX: ${this.rangeX}`);
-    console.log(`rangeY: ${this.rangeY}`);
-    console.log(`numXTicks: ${this.numXTicks}`);
-    console.log(`numYTicks ${this.numYTicks}`);
-    console.log(`x: ${this.x}`);
-    console.log(`y: ${this.y}`);
-    console.log(`width: ${this.width}`);
-    console.log(`height: ${this.height}`);
-    console.log(`scaleX: ${this.scaleX}`);
-    console.log(`scaleY: ${this.scaleY}`);
-  }
+  // private displayCalc() {
+  //   console.log(`rangeX: ${this.rangeX}`);
+  //   console.log(`rangeY: ${this.rangeY}`);
+  //   console.log(`numXTicks: ${this.numXTicks}`);
+  //   console.log(`numYTicks ${this.numYTicks}`);
+  //   console.log(`x: ${this.x}`);
+  //   console.log(`y: ${this.y}`);
+  //   console.log(`width: ${this.width}`);
+  //   console.log(`height: ${this.height}`);
+  //   console.log(`scaleX: ${this.scaleX}`);
+  //   console.log(`scaleY: ${this.scaleY}`);
+  // }
 
-  public draw() {
+  public draw(draw: DrawParam) {
+    const {
+      drawXAxis = true,
+      drawXValue = true,
+      drawXTick = true,
+      drawYAxis = true,
+      drawYValue = true,
+      drawYTick = true,
+    } = draw;
+    if (this.ctx === null) return;
+
     this.calcRelation();
-    // this.displayCalc();
-    this.drawXAxis();
-    this.drawXLabel();
-    this.drawYAxis();
-    this.drawYLabel();
+
+    if (drawXAxis) this.drawXAxis();
+    if (drawXTick) this.drawXTick();
+    if (drawXValue) this.drawXValue();
+
+    if (drawYAxis) this.drawYAxis();
+    if (drawYTick) this.drawYTick();
+    if (drawYValue) this.drawYValue();
+
     this.drawLine();
   }
 }

@@ -1,12 +1,16 @@
 interface DataType {
-  x: number;
-  y: number;
+  line_x: number;
+  line_y: number;
 }
 
 interface LineChartData {
   title?: string;
   tooltip?: boolean;
-  data: DataType[];
+  xAxisSelector?: string;
+  yAxisSelector?: string;
+  lineDataSelector?: string;
+  barDataSelector?: string;
+  data: DataType[] | Array<any>;
 }
 
 interface LineChartParam {
@@ -19,7 +23,18 @@ interface LineChartParam {
   maxYAxis?: number;
   unitsPerTickX?: number;
   unitsPerTickY?: number;
+  axisColor?: string;
+  pointRadius?: number;
   data?: LineChartData;
 }
 
-export { LineChartParam, LineChartData, DataType };
+interface DrawParam {
+  drawXAxis?: boolean;
+  drawXValue?: boolean;
+  drawXTick?: boolean;
+  drawYAxis?: boolean;
+  drawYValue?: boolean;
+  drawYTick?: boolean;
+}
+
+export { LineChartParam, LineChartData, DataType, DrawParam };
