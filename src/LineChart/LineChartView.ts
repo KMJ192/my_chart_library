@@ -6,8 +6,6 @@ import { LineChartParam, DrawParam } from './LineChartTypes';
 import '../style/UiView.scss';
 
 const lineChartMockData = {
-  title: 'LineChart',
-  tooltip: true,
   data: [
     {
       lineX: 0,
@@ -135,10 +133,23 @@ const lineChartMockData = {
 export const primaryLineChart: UiViewTypes = {
   chartName: 'primaryLineChart',
   viewPreview: 'preview',
-  renderChart: (): HTMLCanvasElement => {
+  renderChart: (): Element => {
+    const container = document.createElement('div');
     const canvas = document.createElement('canvas');
+    const tooltip = document.createElement('div');
+
+    tooltip.style.position = 'absolute';
+    tooltip.style.display = 'none';
+    tooltip.style.width = '50px';
+    tooltip.style.height = 'auto';
+    tooltip.style.padding = '5px';
+    tooltip.style.border = '1px solid rgb(177, 177, 177)';
+    tooltip.style.backgroundColor = '#FFFFFF';
+    tooltip.style.borderRadius = '5px';
+
     const param: LineChartParam = {
       canvas,
+      tooltip,
       unitsPerTickX: 1,
       unitsPerTickY: 1,
       width: 1000,
@@ -157,8 +168,9 @@ export const primaryLineChart: UiViewTypes = {
       drawYTick: true,
     };
     lineChart.draw(draw);
+    container.append(canvas, tooltip);
 
-    return canvas;
+    return container;
   },
   renderCode: (): string => {
     return '';

@@ -4,8 +4,6 @@ interface DataType {
 }
 
 interface LineChartData {
-  title?: string;
-  tooltip?: boolean;
   xAxisSelector?: string;
   yAxisSelector?: string;
   lineDataSelector?: string;
@@ -15,6 +13,7 @@ interface LineChartData {
 
 interface LineChartParam {
   canvas: HTMLCanvasElement;
+  tooltip?: HTMLElement;
   width?: number;
   height?: number;
   minXAxis?: number;

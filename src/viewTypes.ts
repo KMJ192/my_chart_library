@@ -11,6 +11,6 @@ export interface ToggleType {
 export interface UiViewTypes {
   chartName: string;
   viewPreview: string;
-  renderChart: () => HTMLCanvasElement;
+  renderChart: () => HTMLCanvasElement | Element;
   renderCode: () => string;
 }

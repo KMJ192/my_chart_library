@@ -4,11 +4,9 @@ import { LineChartParam, DataType, DrawParam } from './LineChartTypes';
 class LineChart {
   private canvas: HTMLCanvasElement;
 
+  private tooltip?: HTMLElement;
+
   private ctx: CanvasRenderingContext2D | null;
-
-  private title: string;
-
-  private tootip: boolean;
 
   private data: DataType[] | any;
 
@@ -63,6 +61,7 @@ class LineChart {
   constructor(param: LineChartParam) {
     const {
       canvas,
+      tooltip,
       data,
       width,
       height,
@@ -82,19 +81,14 @@ class LineChart {
     this.canvas = canvas;
 
     /**
+     * tootip
+     */
+    this.tooltip = tooltip;
+
+    /**
      * canvas 2d context
      */
     this.ctx = this.canvas.getContext('2d');
-
-    /**
-     * chart 타이틀
-     */
-    this.title = data?.title || '';
-
-    /**
-     * visible tooltip
-     */
-    this.tootip = data?.tooltip || false;
 
     /**
      * setting canvas width
@@ -177,9 +171,9 @@ class LineChart {
     /**
      * data selector 설정
      */
-    this.xAxisSelector = data?.xAxisSelector || 'line_x';
+    this.xAxisSelector = data?.xAxisSelector || 'lineX';
 
-    this.yAxisSelector = data?.yAxisSelector || 'line_y';
+    this.yAxisSelector = data?.yAxisSelector || 'lineY';
   }
 
   private calcRelation() {
@@ -348,8 +342,7 @@ class LineChart {
     const startY = data[0][yAxisSelector] || 0;
     ctx.moveTo(startX, startY);
 
-    for (let i = 0; i < data.length; i++) {
-      const point = data[i];
+    data.forEach((point: any, i: number) => {
       if (point[xAxisSelector] === undefined) ctx.lineTo(i * scaleX, point[yAxisSelector] * scaleY);
       else ctx.lineTo(point[xAxisSelector] * scaleX, point[yAxisSelector] * scaleY);
 
@@ -367,8 +360,40 @@ class LineChart {
       ctx.beginPath();
       if (point[xAxisSelector] === undefined) ctx.moveTo(i * scaleX, point[yAxisSelector] * scaleY);
       else ctx.moveTo(point[xAxisSelector] * scaleX, point[yAxisSelector] * scaleY);
-    }
+    });
+
     ctx.restore();
+  }
+
+  private innerArea(px: number, py: number) {
+    const { canvas, unitsPerTickX } = this;
+    const x = px - canvas.offsetLeft;
+    console.log(x);
+  }
+
+  private tooltipMaker(px: number, py: number) {
+    if (!this.tooltip) return;
+    const { tooltip } = this;
+    tooltip.style.display = 'block';
+    tooltip.style.left = String(px + px * 0.02);
+    tooltip.style.top = String(py + py * 0.02);
+    this.innerArea(px, py);
+
+    tooltip.innerHTML = `
+      test
+    `;
+  }
+
+  private tooltipEvent() {
+    const { canvas } = this;
+    canvas.addEventListener('mousemove', (e: MouseEvent) => {
+      const px = e.pageX;
+      const py = e.pageY;
+      // const x = px - canvas.offsetLeft;
+      // const y = py - canvas.offsetTop;
+      // console.log(x);
+      this.tooltipMaker(px, py);
+    });
   }
 
   // private displayCalc() {
@@ -406,6 +431,7 @@ class LineChart {
     if (drawYValue) this.drawYValue();
 
     this.drawLine();
+    if (this.tooltip) this.tooltipEvent();
   }
 }
 
