@@ -1,14 +1,21 @@
+const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.config.js');
 
-const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserWebpackPlugin = require('terser-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-const config = {
+const prodDir = 'build';
+
+module.exports = merge(common, {
+  entry: './index.ts',
+  output: {
+    filename: '[name].[chunkhash].js',
+    path: path.resolve(__dirname, prodDir),
+  },
   devtool: 'hidden-source-map',
   mode: 'production',
-  plugins: [new CssMinimizerWebpackPlugin(), new CleanWebpackPlugin()],
   optimization: {
     runtimeChunk: {
       name: 'runtime',
@@ -25,6 +32,18 @@ const config = {
     minimize: true,
     minimizer: [new TerserWebpackPlugin()],
   },
-};
-
-module.exports = merge(common, config);
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Webpack',
+      template: './public/index.html',
+      filename: 'index.html',
+      minify: {
+        removeComments: true,
+        useShortDoctype: true,
+      },
+    }),
+    new MiniCssExtractPlugin({
+      filename: '[contenthash].css',
+    }),
+  ],
+});

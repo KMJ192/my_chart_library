@@ -2,14 +2,10 @@ const path = require('path');
 const webpack = require('webpack');
 
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
 
 const isProd = process.env.NODE_ENV === 'PRODUCTION';
-
-const buildDir = 'build';
-const viewDir = 'dist';
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx', '.wasm'];
 const alias = {
@@ -34,7 +30,6 @@ const cssLoader = {
 };
 
 module.exports = {
-  entry: isProd ? './index.ts' : './src/index.ts',
   resolve: {
     extensions,
     alias,
@@ -43,7 +38,7 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx)?$/,
-        use: ['ts-loader'],
+        use: ['babel-loader', 'ts-loader'],
         exclude: /node_modules/,
       },
       {
@@ -62,32 +57,19 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: 'css-loader',
+            options: { import: true },
+          },
+        ],
         exclude: /node_modules/,
       },
     ],
   },
-  output: {
-    filename: '[name].[chunkhash].js',
-    path: isProd ? path.join(__dirname, buildDir) : path.join(__dirname, viewDir),
-  },
   plugins: [
-    new HtmlWebpackPlugin({
-      title: 'Webpack',
-      template: './src/index.html',
-      filename: 'index.html',
-      minify: isProd
-        ? {
-            removeComments: true,
-            useShortDoctype: true,
-          }
-        : false,
-    }),
-    new webpack.HotModuleReplacementPlugin(),
     new ForkTsCheckerWebpackPlugin(),
-    new MiniCssExtractPlugin({
-      filename: '[contenthash].css',
-    }),
     new webpack.DefinePlugin({
       IS_PRODUCTION: isProd,
     }),
