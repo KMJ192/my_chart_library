@@ -11,6 +11,8 @@ const extensions = ['.js', '.jsx', '.ts', '.tsx', '.wasm'];
 const alias = {
   '@src': path.resolve(__dirname, 'src'),
   '@wasm': path.resolve(__dirname, 'wasm_module/pkg'),
+  '@react': path.resolve(__dirname, 'custom_modules/react'),
+  '@router': path.resolve(__dirname, 'custom_modules/router'),
 };
 
 const postcssLoader = {
@@ -46,11 +48,21 @@ module.exports = {
         oneOf: [
           {
             test: /\.module\.s[ac]ss$/,
-            use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', cssLoader, postcssLoader, 'sass-loader'],
+            use: [
+              isProd ? MiniCssExtractPlugin.loader : 'style-loader',
+              cssLoader,
+              postcssLoader,
+              'sass-loader',
+            ],
             exclude: /node_modules/,
           },
           {
-            use: [isProd ? MiniCssExtractPlugin.loader : 'style-loader', 'css-loader', postcssLoader, 'sass-loader'],
+            use: [
+              isProd ? MiniCssExtractPlugin.loader : 'style-loader',
+              'css-loader',
+              postcssLoader,
+              'sass-loader',
+            ],
             exclude: /node_modules/,
           },
         ],

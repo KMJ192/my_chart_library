@@ -4,19 +4,25 @@
     "declarationDir": "./build",
     "baseUrl": ".",
     "outDir": "dist",
+    // "paths": {
+    //   "@src/*": ["src/*"],
+    //   "@react/*": ["custom_module/react/*"],
+    //   "@router/*": ["custom_module/router/*"]
+    // },
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": ["dom", "dom.iterable", "esnext", "ES2015"],
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "strict": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "noImplicitThis": false,
     "noImplicitAny": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "typeRoots": ["./typings"],
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
-  "include": [".", "src/**/*", "./typings", "declaration.d.ts"]
+  "exclude": ["node_modules"],
+  "include": [".", "src/**/*", "./types", "declaration.d.ts", "global.d.ts"]
 }
