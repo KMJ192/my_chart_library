@@ -7,4 +7,4 @@ interface RouterType {
   exact?: boolean;
 }
 
-export { RouterType };
+export type { RouterType };

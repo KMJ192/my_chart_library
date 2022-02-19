@@ -1,10 +1,20 @@
 import React from '@react';
-import { ReactDOM } from 'custom_modules/react';
-import { RouterType } from './types';
+import type { ReactDOM } from 'custom_modules/react';
+import type { RouterType } from './types';
 
+/**
+ * Router
+ */
 const Router = (function () {
   let query: { [key: string]: string } = {};
 
+  /**
+   *
+   * @param MainPage - 기본 url react 컴포넌트
+   * @param NotFound - 찾지 못한 url react 컴포넌트
+   * @param components - react 컴포넌트
+   * @returns react 컴포넌트
+   */
   function useRouter(
     MainPage: () => ReactDOM,
     NotFound: () => ReactDOM,
@@ -50,11 +60,20 @@ const Router = (function () {
     return NotFound();
   }
 
+  /**
+   * url로 이동
+   * @param url 이동할 url
+   * @param data history.pushState에 입력할 data
+   */
   function useRedirection(url: string, data?: { [key: string]: string }) {
     history.pushState(data, '', url);
-    React.routeRender();
+    React.routeRenderer();
   }
 
+  /**
+   * query string을 사용한 url의 정보 반환
+   * @returns query
+   */
   function useParam() {
     return query;
   }

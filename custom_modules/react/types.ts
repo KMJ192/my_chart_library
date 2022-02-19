@@ -1,10 +1,32 @@
-interface React {
+import { Reducers } from '@redux/types';
+
+interface ReactType {
   useState<T>(initState: T): [T, (newVal: T) => void];
   useState<T = undefined>(
     initState?: T,
   ): [T | undefined, (newVal: T | undefined) => void];
   useEffect(effect: () => any, deps?: readonly any[]): void;
   useDocument(event: () => void): void;
+  useStateNoRender<T>(initState: T): [T, (newVal: T) => void];
+  useStateNoRender<T = undefined>(
+    initState?: T,
+  ): [T | undefined, (newVal: T | undefined) => void];
+  useDispatch: (type: string) => void;
+  useSelector: (selector: (state: Reducers) => any) => any;
+}
+
+interface ReactClosureOptions {
+  root: Element | null;
+  stateKey: number;
+  states: any[];
+  component?: (() => ReactDOM[]) | (() => ReactDOM) | null;
+  componentUnmount?: () => void;
+  injected: {
+    event: () => any;
+    unmount?: () => void;
+  };
+  store?: any;
+  reduxState?: { [key: string]: any };
 }
 
 interface ReactDOM {
@@ -28,16 +50,9 @@ interface ReactDOM {
   node?: HTMLElement;
 }
 
-interface ReactClosureOptions {
-  root: Element | null;
-  stateKey: number;
-  states: any[];
-  component?: (() => ReactDOM[]) | (() => ReactDOM) | null;
-  unmount?: () => void;
-  injected: {
-    event: () => any;
-    unmount?: () => void;
-  };
+interface ProviderType {
+  store: any;
+  reactApp: (() => ReactDOM) | (() => ReactDOM[]);
 }
 
-export { React, ReactClosureOptions, ReactDOM };
+export { ReactType, ReactClosureOptions, ReactDOM, ProviderType };
