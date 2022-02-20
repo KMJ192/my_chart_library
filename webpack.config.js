@@ -10,9 +10,10 @@ const isProd = process.env.NODE_ENV === 'PRODUCTION';
 const extensions = ['.js', '.jsx', '.ts', '.tsx', '.wasm'];
 const alias = {
   '@src': path.resolve(__dirname, 'src'),
-  '@wasm': path.resolve(__dirname, 'wasm_module/pkg'),
   '@react': path.resolve(__dirname, 'custom_modules/react'),
   '@router': path.resolve(__dirname, 'custom_modules/router'),
+  '@api': path.resolve(__dirname, 'custom_modules/api'),
+  '@redux': path.resolve(__dirname, 'custom_modules/redux'),
 };
 
 const postcssLoader = {

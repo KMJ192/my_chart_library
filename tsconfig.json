@@ -4,11 +4,13 @@
     "declarationDir": "./build",
     "baseUrl": ".",
     "outDir": "dist",
-    // "paths": {
-    //   "@src/*": ["src/*"],
-    //   "@react/*": ["custom_module/react/*"],
-    //   "@router/*": ["custom_module/router/*"]
-    // },
+    "paths": {
+      "@src/*": ["src/*"],
+      "@react/*": ["custom_modules/react/*"],
+      "@router/*": ["custom_modules/router/*"],
+      "@api/*": ["custom_modules/api/*"],
+      "@redux/*": ["custom_modules/redux/*"]
+    },
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext", "ES2015"],
     "skipLibCheck": true,

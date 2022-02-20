@@ -5,7 +5,11 @@ import './style/UiView.scss';
 import { primaryLineChart } from './LineChart/LineChartView';
 
 export const root = document.getElementById('root');
-export const chartList: UiViewTypes[] = [primaryLineChart, donutChart, primaryPieChart];
+export const chartList: UiViewTypes[] = [
+  primaryLineChart,
+  donutChart,
+  primaryPieChart,
+];
 
 export class UiView {
   private root: HTMLElement | null;
@@ -77,7 +81,12 @@ export class UiView {
     return topElement;
   }
 
-  private bodyContentRender({ renderChart, renderCode, chartName, viewPreview }: UiViewTypes) {
+  private bodyContentRender({
+    renderChart,
+    renderCode,
+    chartName,
+    viewPreview,
+  }: UiViewTypes) {
     const { classNames } = this;
     this.topElement = this.topContentRender(chartName);
 
@@ -208,8 +217,10 @@ export class UiView {
       this.bodyContentRender(bodyContent);
 
       // preview(차트) | code(코드) 선택 이벤트
-      const tabs: HTMLCollectionOf<Element> = document.getElementsByClassName(classNames.tabButton);
-      for (let i: number = 0; i < tabs.length; i++) {
+      const tabs: HTMLCollectionOf<Element> = document.getElementsByClassName(
+        classNames.tabButton,
+      );
+      for (let i = 0; i < tabs.length; i++) {
         (tabs[i] as HTMLDivElement).addEventListener('click', tabClick);
       }
     });
