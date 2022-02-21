@@ -1,3 +1,11 @@
+import { CanvasChartParam } from '../CanvasChartTypes';
+
+interface AxisPositionType<T> {
+  left: T;
+  bottom: T;
+  right: T;
+}
+
 interface Series {
   name: string;
   series: number[];
@@ -13,21 +21,19 @@ interface SeriesParamType extends Series {
   lineWidth?: number;
 }
 
-interface Axis {
-  left: number;
+interface AxisType {
+  left: AxisInfo;
+  right: AxisInfo;
+  bottom: BottomAxisInfo;
 }
 
-interface AxisType extends Axis {
-  bottom: number;
-  right: number;
+interface AxisParamType {
+  left: AxisParamInfo;
+  right?: AxisParamInfo;
+  bottom: BottomAxisParamInfo;
 }
 
-interface AxisParamType extends Axis {
-  bottom?: number;
-  right?: number;
-}
-
-interface DataType {
+interface SeriesDataType {
   left: SeriesType[];
   bottom: SeriesType[];
   right: SeriesType[];
@@ -48,7 +54,6 @@ interface AxisInfo {
   tickSize: number;
   tickColor: string;
   lineWidth: number;
-  value: number[];
   color: string;
 }
 
@@ -65,12 +70,20 @@ interface AxisParamInfo {
   tickSize?: number;
   tickColor?: string;
   lineWidth?: number;
-  value?: number[];
   color?: string;
 }
 
 interface BottomAxisParamInfo extends AxisParamInfo {
   data?: number[] | string[];
+}
+
+interface AxisTypeChartParam extends CanvasChartParam {
+  series: DataParamType;
+  axis: AxisParamType;
+  dataLength: number;
+  point?: number;
+  font?: string;
+  fontHeight?: number;
 }
 
 interface RenderOption {
@@ -89,17 +102,18 @@ interface RenderOption {
 }
 
 export {
+  AxisPositionType,
   Series,
   SeriesType,
   SeriesParamType,
-  Axis,
   AxisType,
   AxisParamType,
-  DataType,
+  SeriesDataType,
   DataParamType,
   AxisInfo,
   AxisParamInfo,
   BottomAxisInfo,
   BottomAxisParamInfo,
   RenderOption,
+  AxisTypeChartParam,
 };

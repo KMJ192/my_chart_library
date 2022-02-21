@@ -1,19 +1,19 @@
 import { ObjectType } from '@src/types';
 
 interface CanvasLayer {
-  type: 'static' | 'animation';
+  type: 'main' | 'static' | 'animation';
   id: string;
   canvasStyle: ObjectType;
-}
-
-interface Vector {
-  x: number;
-  y: number;
 }
 
 interface CanvasLayerType extends CanvasLayer {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D | null;
+}
+
+interface Vector {
+  x: number;
+  y: number;
 }
 
 interface CanvasChartParam {

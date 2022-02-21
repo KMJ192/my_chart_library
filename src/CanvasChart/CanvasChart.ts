@@ -9,7 +9,11 @@ class CanvasChart {
 
   protected canvasLayer: Types.CanvasLayerType[];
 
-  protected canvasStyle?: GlobalType.ObjectType;
+  protected tooltip: HTMLElement | null;
+
+  protected tooltipTemplate: string | null;
+
+  protected legend: HTMLElement | null;
 
   protected defaultValue: GlobalType.ObjectType;
 
@@ -19,7 +23,9 @@ class CanvasChart {
 
   protected height: number;
 
-  constructor({ node, canvasLayer, width, height }: Types.CanvasChartParam) {
+  protected mainChartIdx: number;
+
+  constructor({ node, width, height, canvasLayer }: Types.CanvasChartParam) {
     this.defaultValue = {
       value: 0,
       padding: 7,
@@ -34,7 +40,10 @@ class CanvasChart {
       eventCanvasId: 'event-canvas',
       legendId: 'chart-legend',
       background: '#FFF',
+      pointRadius: 3,
     };
+
+    this.mainChartIdx = 0;
 
     /**
      * canvas 레이어 설정
@@ -46,6 +55,9 @@ class CanvasChart {
     this.canvasLayer = [];
     canvasLayer.forEach((level: Types.CanvasLayer, idx: number) => {
       const { type, id, canvasStyle } = level;
+      if (type === 'main') {
+        this.mainChartIdx = idx;
+      }
       this.canvasLayer[idx] = {
         type,
         id,
@@ -54,11 +66,12 @@ class CanvasChart {
         ctx: null,
       };
       Object.entries(canvasStyle).forEach(([key, value]) => {
-        (this.canvasLayer[idx].canvas.style as any)[key] = value;
+        (this.canvasLayer[idx].canvas?.style as any)[key] = value;
       });
       this.canvasLayer[idx].ctx = this.canvasLayer[idx].canvas.getContext('2d');
       this.canvasLayer[idx].canvas.style.display = 'absolute';
       this.canvasLayer[idx].canvas.style.width = '100%';
+      this.canvasContainer?.appendChild(this.canvasLayer[idx].canvas);
     });
 
     this.width = width;
@@ -66,6 +79,12 @@ class CanvasChart {
     this.height = height;
 
     this.events = [];
+
+    this.tooltip = null;
+
+    this.tooltipTemplate = null;
+
+    this.legend = null;
 
     node.appendChild(this.canvasContainer);
   }
@@ -133,11 +152,8 @@ class CanvasChart {
    * @param run canvas노드를 감지했을때 실행할 메서드
    * @param stop canvas노드가 사라졌을때 실행할 메서드
    */
-  protected canvasObserver(
-    canvas: HTMLCanvasElement,
-    run?: () => void,
-    stop?: () => void,
-  ) {
+  protected canvasObserver(run?: () => void, stop?: () => void) {
+    if (this.canvasContainer === null) return;
     const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
         entries.forEach((entry: IntersectionObserverEntry) => {
@@ -150,7 +166,7 @@ class CanvasChart {
         });
       },
     );
-    observer.observe(canvas);
+    observer.observe(this.canvasContainer);
   }
 }
 
