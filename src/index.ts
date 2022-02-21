@@ -16,5 +16,5 @@ import App from './App';
 React.render(App, document.getElementById('App'));
 
 window.addEventListener('popstate', () => {
-  React.routeRender();
+  React.routeRenderer();
 });

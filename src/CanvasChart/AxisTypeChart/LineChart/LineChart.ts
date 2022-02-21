@@ -32,6 +32,10 @@ class LineChart extends AxisTypeChart {
     height = height || 700;
     super({ node, series, axis, width, height, canvasLayer, dataLength });
   }
+
+  public dataInitialize() {}
+
+  public render() {}
 }
 
 export default LineChart;
