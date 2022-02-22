@@ -25,9 +25,7 @@ interface LineChartParam {
   maxDataLength?: number;
   renderOption: RenderOption;
   tooltipId?: string;
-  tooltipStyle?: {
-    [key: string]: string;
-  };
+  tooltipStyle?: ObjectType;
 }
 
 export { LineChartParam };

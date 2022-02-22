@@ -35,7 +35,6 @@ interface AxisParamType {
 
 interface SeriesDataType {
   left: SeriesType[];
-  bottom: SeriesType[];
   right: SeriesType[];
 }
 
@@ -78,9 +77,6 @@ interface BottomAxisParamInfo extends AxisParamInfo {
 }
 
 interface AxisTypeChartParam extends CanvasChartParam {
-  series: DataParamType;
-  axis: AxisParamType;
-  dataLength: number;
   point?: number;
   font?: string;
   fontHeight?: number;

@@ -1,5 +1,5 @@
 import * as GlobalType from '@src/types';
-import * as Types from './CanvasChartTypes';
+import * as CanvasChartTypes from './CanvasChartTypes';
 
 class CanvasChart {
   /**
@@ -7,7 +7,7 @@ class CanvasChart {
    */
   protected canvasContainer: HTMLElement | null;
 
-  protected canvasLayer: Types.CanvasLayerType[];
+  protected canvasLayer: CanvasChartTypes.CanvasLayerType[];
 
   protected tooltip: HTMLElement | null;
 
@@ -25,7 +25,14 @@ class CanvasChart {
 
   protected mainChartIdx: number;
 
-  constructor({ node, width, height, canvasLayer }: Types.CanvasChartParam) {
+  protected animationChartIdx: number;
+
+  constructor({
+    node,
+    width,
+    height,
+    canvasLayer,
+  }: CanvasChartTypes.CanvasChartParam) {
     this.defaultValue = {
       value: 0,
       padding: 7,
@@ -45,6 +52,8 @@ class CanvasChart {
 
     this.mainChartIdx = 0;
 
+    this.animationChartIdx = 0;
+
     /**
      * canvas 레이어 설정
      */
@@ -52,12 +61,14 @@ class CanvasChart {
 
     this.canvasContainer.style.display = 'relative';
 
+    const dpr = window.devicePixelRatio;
+
+    /**
+     * canvas 레이어 구축
+     */
     this.canvasLayer = [];
-    canvasLayer.forEach((level: Types.CanvasLayer, idx: number) => {
+    canvasLayer.forEach((level: CanvasChartTypes.CanvasLayer, idx: number) => {
       const { type, id, canvasStyle } = level;
-      if (type === 'main') {
-        this.mainChartIdx = idx;
-      }
       this.canvasLayer[idx] = {
         type,
         id,
@@ -65,18 +76,28 @@ class CanvasChart {
         canvas: document.createElement('canvas') as HTMLCanvasElement,
         ctx: null,
       };
+      if (type === 'main') {
+        this.mainChartIdx = idx;
+      } else if (type === 'animation') {
+        this.animationChartIdx = idx;
+      }
+      this.canvasLayer[idx].canvas.id = `${type}-canvas`;
       Object.entries(canvasStyle).forEach(([key, value]) => {
         (this.canvasLayer[idx].canvas?.style as any)[key] = value;
       });
       this.canvasLayer[idx].ctx = this.canvasLayer[idx].canvas.getContext('2d');
-      this.canvasLayer[idx].canvas.style.display = 'absolute';
+      this.canvasLayer[idx].canvas.style.position = 'absolute';
       this.canvasLayer[idx].canvas.style.width = '100%';
+      // anti aliasing 보정
+      this.canvasLayer[idx].canvas.width = width * dpr;
+      this.canvasLayer[idx].canvas.height = height * dpr;
+      this.canvasLayer[idx].ctx?.scale(dpr, dpr);
       this.canvasContainer?.appendChild(this.canvasLayer[idx].canvas);
     });
 
-    this.width = width;
+    this.width = this.defaultValue.value;
 
-    this.height = height;
+    this.height = this.defaultValue.value;
 
     this.events = [];
 
@@ -87,20 +108,6 @@ class CanvasChart {
     this.legend = null;
 
     node.appendChild(this.canvasContainer);
-  }
-
-  /**
-   * 안티엘리어싱 보정
-   */
-  protected antiAliasingCorrection() {
-    const dpr = window.devicePixelRatio;
-    const { width, height } = this;
-    this.canvasLayer.forEach((layer: Types.CanvasLayerType) => {
-      const { canvas, ctx } = layer;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      ctx?.scale(dpr, dpr);
-    });
   }
 
   /**
@@ -117,6 +124,14 @@ class CanvasChart {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.restore();
+  }
+
+  protected ctxClear() {
+    const { canvasLayer } = this;
+    canvasLayer.forEach((layer: CanvasChartTypes.CanvasLayerType) => {
+      const { canvas, ctx } = layer;
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    });
   }
 
   /**
@@ -136,10 +151,10 @@ class CanvasChart {
   /**
    * Canvas 크기보정
    */
-  protected correctionCanavas() {
+  protected correctionCanvas() {
     const dpr = window.devicePixelRatio;
 
-    this.canvasLayer.forEach((layer: Types.CanvasLayerType) => {
+    this.canvasLayer.forEach((layer: CanvasChartTypes.CanvasLayerType) => {
       const { canvas } = layer;
       const { width, height } = canvas.getBoundingClientRect();
       canvas.width = width * dpr;
@@ -168,6 +183,23 @@ class CanvasChart {
     );
     observer.observe(this.canvasContainer);
   }
+
+  /**
+   * event함수를 관리하는 events 배열
+   * @param eventFunc
+   */
+  protected addEvents = (...eventFunc: any) => {
+    this.events = [eventFunc];
+  };
+
+  /**
+   * event remove
+   */
+  protected removeEvents = () => {
+    this.events.forEach((removeEvent: (() => void) | null) => {
+      if (removeEvent) removeEvent();
+    });
+  };
 }
 
 export default CanvasChart;

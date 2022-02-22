@@ -1,3 +1,4 @@
+import { throttle } from 'lodash';
 import { crispPixel } from '@src/untils';
 
 import CanvasChart from '../CanvasChart';
@@ -5,11 +6,9 @@ import * as CanvasChartTypes from '../CanvasChartTypes';
 import * as AxisChartType from './AxisTypeChartTypes';
 
 class AxisTypeChart extends CanvasChart {
-  protected series: AxisChartType.SeriesDataType;
+  protected series: AxisChartType.SeriesDataType | null;
 
-  protected axis: AxisChartType.AxisType;
-
-  protected pointRadius: number;
+  protected axis: AxisChartType.AxisType | null;
 
   protected font: string;
 
@@ -34,101 +33,24 @@ class AxisTypeChart extends CanvasChart {
 
   protected renderOption: AxisChartType.RenderOption;
 
-  protected dataLength: number;
+  protected createdNode: {
+    legend: boolean;
+    tooltip: boolean;
+  };
 
   constructor({
     node,
     canvasLayer,
     width,
-    series,
-    axis,
     height,
-    point,
     font,
     fontHeight,
-    dataLength,
   }: AxisChartType.AxisTypeChartParam) {
     super({ node, width, height, canvasLayer });
 
-    this.dataLength = dataLength;
+    this.series = null;
 
-    this.series = {
-      left: [],
-      bottom: [],
-      right: [],
-    };
-
-    series.left.forEach(
-      (series: AxisChartType.SeriesParamType, idx: number) => {
-        this.series.left[idx] = {
-          name: series.name,
-          series: series.series,
-          color: series.color || this.defaultValue.color,
-          lineWidth: series.lineWidth || 1,
-        };
-      },
-    );
-
-    series.bottom?.forEach(
-      (series: AxisChartType.SeriesParamType, idx: number) => {
-        this.series.bottom[idx] = {
-          name: series.name,
-          series: series.series,
-          color: series.color || this.defaultValue.color,
-          lineWidth: series.lineWidth || 1,
-        };
-      },
-    );
-
-    series.right?.forEach(
-      (series: AxisChartType.SeriesParamType, idx: number) => {
-        this.series.right[idx] = {
-          name: series.name,
-          series: series.series,
-          color: series.color || this.defaultValue.color,
-          lineWidth: series.lineWidth || 1,
-        };
-      },
-    );
-
-    this.axis = {
-      left: {
-        name: axis.left.name || '',
-        unitsPerTick: axis.left.unitsPerTick || 1,
-        max: axis.left.max || 0,
-        min: axis.left.min || 0,
-        padding: axis.left.padding || this.defaultValue.padding,
-        tickSize: axis.left.tickSize || 0,
-        tickColor: axis.left.tickColor || this.defaultValue.color,
-        lineWidth: axis.left.lineWidth || 1,
-        color: axis.left.color || this.defaultValue.color,
-      },
-      bottom: {
-        name: axis.bottom.name || '',
-        unitsPerTick: axis.bottom.unitsPerTick || 1,
-        max: axis.bottom.max || 0,
-        min: axis.bottom.min || 0,
-        padding: axis.bottom.padding || this.defaultValue.padding,
-        tickSize: axis.bottom.tickSize || 0,
-        tickColor: axis.bottom.tickColor || this.defaultValue.color,
-        lineWidth: axis.bottom.lineWidth || 1,
-        color: axis.bottom.color || this.defaultValue.color,
-        data: axis.bottom.data || [],
-      },
-      right: {
-        name: axis.right?.name || '',
-        unitsPerTick: axis.right?.unitsPerTick || 1,
-        max: axis.right?.max || 0,
-        min: axis.right?.min || 0,
-        padding: axis.right?.padding || this.defaultValue.padding,
-        tickSize: axis.right?.tickSize || 0,
-        tickColor: axis.right?.tickColor || this.defaultValue.color,
-        lineWidth: axis.right?.lineWidth || 1,
-        color: axis.right?.color || this.defaultValue.color,
-      },
-    };
-
-    this.pointRadius = point || this.defaultValue.pointRadius;
+    this.axis = null;
 
     this.font = font || this.defaultValue.font;
 
@@ -182,6 +104,8 @@ class AxisTypeChart extends CanvasChart {
 
     this.middlePosition = 0;
 
+    this.legend = null;
+
     this.renderOption = {
       bottomAxis: true,
       bottomTick: true,
@@ -196,6 +120,13 @@ class AxisTypeChart extends CanvasChart {
       legend: true,
       guideLine: true,
     };
+
+    this.createdNode = {
+      legend: false,
+      tooltip: false,
+    };
+
+    this.tooltipTemplate = null;
   }
 
   /**
@@ -203,9 +134,10 @@ class AxisTypeChart extends CanvasChart {
    */
   protected calcMax() {
     const { axis, series } = this;
+    if (axis === null || series === null) return;
 
     // x축 (axis.bottom)의 max값 설정
-    if (axis.bottom.max !== 0 && axis.bottom.data.length > 0) {
+    if (axis.bottom.max === 0 && axis.bottom.data.length > 0) {
       axis.bottom.max = axis.bottom.data.length - 1;
     }
 
@@ -214,8 +146,6 @@ class AxisTypeChart extends CanvasChart {
       const { series } = datas;
       axis.left.max = Math.max(axis.left.max as number, ...series);
     });
-
-    if (axis.right === undefined || series.right === undefined) return;
 
     // right y축 max값 설정
     series.right.forEach((datas: AxisChartType.SeriesType) => {
@@ -230,7 +160,6 @@ class AxisTypeChart extends CanvasChart {
    * 그래프 비율 계산
    */
   protected calcRelation() {
-    if (this.axis === undefined) return;
     const {
       canvasLayer,
       mainChartIdx,
@@ -241,6 +170,7 @@ class AxisTypeChart extends CanvasChart {
       fontHeight,
       defaultValue,
     } = this;
+    if (axis === null) return;
     const { canvas } = canvasLayer[mainChartIdx];
 
     // bottom y축 범위 계산
@@ -320,9 +250,13 @@ class AxisTypeChart extends CanvasChart {
     this.scale = this.width / this.range.bottom;
 
     this.elementArea = {
-      bottom: (this.area.end.x - this.area.start.x) / this.range.bottom,
-      left: (this.area.start.y - this.area.end.y) / this.range.left,
-      right: (this.area.start.y - this.area.end.y) / this.range.right,
+      bottom: Math.floor(
+        (this.area.end.x - this.area.start.x) / this.range.bottom,
+      ),
+      left: Math.floor((this.area.start.y - this.area.end.y) / this.range.left),
+      right: Math.floor(
+        (this.area.start.y - this.area.end.y) / this.range.right,
+      ),
     };
 
     this.middlePosition = Math.floor(
@@ -342,46 +276,56 @@ class AxisTypeChart extends CanvasChart {
       axis,
       startPoint,
       mainChartIdx,
+      renderOption,
       defaultValue,
     } = this;
     const { ctx } = canvasLayer[mainChartIdx];
-    if (ctx === null) return;
+    if (ctx === null || axis === null) return;
     ctx.save();
     // x축 그리기
-    let lineWidth = axis.bottom.lineWidth || defaultValue.lineWidth;
-    let xPoint = startPoint.bottom.x;
-    let yPoint = crispPixel(startPoint.bottom.y, lineWidth);
-    ctx.strokeStyle = axis.bottom.color || defaultValue.color;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(xPoint, yPoint);
-    ctx.lineTo(xPoint + width, yPoint);
-    ctx.stroke();
-    ctx.closePath();
+    let lineWidth = 1;
+    let xPoint = 0;
+    let yPoint = 0;
+    if (renderOption.bottomAxis) {
+      lineWidth = axis.bottom.lineWidth || defaultValue.lineWidth;
+      xPoint = startPoint.bottom.x;
+      yPoint = crispPixel(startPoint.bottom.y, lineWidth);
+      ctx.strokeStyle = axis.bottom.color || defaultValue.color;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(xPoint, yPoint);
+      ctx.lineTo(xPoint + width, yPoint);
+      ctx.stroke();
+      ctx.closePath();
+    }
 
     // left y축 그리기
-    lineWidth = axis.left.lineWidth || defaultValue.lineWidth;
-    xPoint = crispPixel(startPoint.left.x, lineWidth);
-    yPoint = startPoint.left.y;
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = axis.left.color || defaultValue.color;
-    ctx.beginPath();
-    ctx.moveTo(xPoint, yPoint);
-    ctx.lineTo(xPoint, yPoint - height);
-    ctx.stroke();
-    ctx.closePath();
+    if (renderOption.leftAxis) {
+      lineWidth = axis.left.lineWidth || defaultValue.lineWidth;
+      xPoint = crispPixel(startPoint.left.x, lineWidth);
+      yPoint = startPoint.left.y;
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = axis.left.color || defaultValue.color;
+      ctx.beginPath();
+      ctx.moveTo(xPoint, yPoint);
+      ctx.lineTo(xPoint, yPoint - height);
+      ctx.stroke();
+      ctx.closePath();
+    }
 
     // right y축 그리기
-    lineWidth = axis.right.lineWidth || defaultValue.lineWidth;
-    xPoint = crispPixel(startPoint.right.x, lineWidth);
-    yPoint = startPoint.right.y;
-    ctx.strokeStyle = axis.right.color || defaultValue.color;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(xPoint, yPoint - height);
-    ctx.lineTo(xPoint, yPoint);
-    ctx.stroke();
-    ctx.closePath();
+    if (renderOption.rightAxis) {
+      lineWidth = axis.right.lineWidth || defaultValue.lineWidth;
+      xPoint = crispPixel(startPoint.right.x, lineWidth);
+      yPoint = startPoint.right.y;
+      ctx.strokeStyle = axis.right.color || defaultValue.color;
+      ctx.lineWidth = lineWidth;
+      ctx.beginPath();
+      ctx.moveTo(xPoint, yPoint - height);
+      ctx.lineTo(xPoint, yPoint);
+      ctx.stroke();
+      ctx.closePath();
+    }
 
     ctx.restore();
   }
@@ -408,7 +352,7 @@ class AxisTypeChart extends CanvasChart {
       renderOption,
     } = this;
     const { ctx } = canvasLayer[mainChartIdx];
-    if (ctx === null) return;
+    if (ctx === null || axis === null) return;
 
     ctx.save();
 
@@ -512,7 +456,7 @@ class AxisTypeChart extends CanvasChart {
       renderOption,
     } = this;
     const { ctx } = canvasLayer[mainChartIdx];
-    if (ctx === null) return;
+    if (ctx === null || axis === null) return;
 
     ctx.save();
 
@@ -597,7 +541,7 @@ class AxisTypeChart extends CanvasChart {
       renderOption,
     } = this;
     const { ctx } = canvasLayer[mainChartIdx];
-    if (ctx === null) return;
+    if (ctx === null || axis === null) return;
 
     ctx.save();
     ctx.beginPath();
@@ -618,7 +562,7 @@ class AxisTypeChart extends CanvasChart {
       ctx.fillStyle = axis.right?.color || defaultValue.color;
       ctx.stroke();
       ctx.fillText(
-        String(this.axis.right.min),
+        String(axis.right.min),
         startPoint.right.x + (axis.right?.tickSize || 0) + 7,
         startPoint.right.y + fontHeight / 2,
       );
@@ -655,6 +599,354 @@ class AxisTypeChart extends CanvasChart {
     }
 
     ctx.restore();
+  }
+
+  /**
+   * tooltip 생성
+   */
+  protected tooltipSetting() {
+    if (this.renderOption.tooltip && this.createdNode.tooltip === false) {
+      this.tooltip = document.createElement('div');
+      this.tooltip.id = this.defaultValue.tooltipId;
+      this.tooltip.style.position = 'absolute';
+      this.tooltip.style.display = 'none';
+      this.tooltip.style.width = 'auto';
+      this.tooltip.style.height = 'auto';
+      this.tooltip.style.zIndex = '10';
+      this.canvasContainer?.appendChild(this.tooltip);
+      this.createdNode.tooltip = true;
+    }
+  }
+
+  /**
+   * Draw legend
+   */
+  protected drawLegend() {
+    if (this.renderOption.legend === true) {
+      if (this.createdNode.legend === false) {
+        this.legend = document.createElement('div');
+        this.legend.style.position = 'absolute';
+        this.legend.style.display = 'flex';
+        this.legend.style.left = '50%';
+        this.legend.style.marginTop = `${
+          this.canvasLayer[this.mainChartIdx].canvas.height - 30
+        }px`;
+        this.legend.style.transform = 'translate(-50%, 0%)';
+        this.canvasContainer?.appendChild(this.legend);
+        this.createdNode.legend = true;
+      }
+    }
+
+    const { legend, series } = this;
+    if (legend === null || series === null) return;
+
+    legend.innerHTML = '';
+
+    series.left.forEach((s) => {
+      const { color, name } = s;
+      const node = document.createElement('div');
+      node.style.display = 'flex';
+      node.style.justifyContent = 'center';
+      node.style.alignItems = 'center';
+      const seriesTemplate = `
+        <div style='background-color:${color};border-radius:50%;width:5px;height:5px;margin-right:3px;'></div>
+        <div style='color:${color};margin-right:5px;font:${this.font}'>${name}</div>
+      `;
+      node.innerHTML = seriesTemplate;
+      legend.appendChild(node);
+    });
+
+    series.right.forEach((s) => {
+      const { color, name } = s;
+      const node = document.createElement('div');
+      node.style.display = 'flex';
+      node.style.justifyContent = 'center';
+      node.style.alignItems = 'center';
+      const seriesTemplate = `
+        <div style='background-color:${color};border-radius:50%;width:5px;height:5px;margin-right:3px;'></div>
+        <div style='color:${color};margin-right:5px;font:${this.font}'>${name}</div>
+      `;
+      node.innerHTML = seriesTemplate;
+
+      legend.appendChild(node);
+    });
+  }
+
+  /**
+   * 현재 mouseover에 대한 x축의 영역에 대한 값 반환
+   * @param dataArea {number} x축 영역
+   * @returns number - x축 영역별 값
+   */
+  private innerInfoBottomAxis(dataArea: number) {
+    if (this.axis === null) return 0;
+    const { axis } = this;
+    if (axis.bottom.data) {
+      return axis.bottom.data[dataArea];
+    }
+    return 0;
+  }
+
+  /**
+   * 현재 mouseover에 대한 x축의 영역에 대한 left축에 종속된 데이터 정보 반환
+   * @param dataArea {number} - mouseover x축 영역
+   * @returns leftInfo - left축에 대한 데이터의 정보 배열
+   */
+  private innerInfoLeftData(dataArea: number) {
+    const leftInfo: { name: string; color: string; data: number }[] = [];
+    const { series, defaultValue } = this;
+    if (series === null) return leftInfo;
+
+    series.left.forEach((s: AxisChartType.SeriesType, i: number) => {
+      const { name, color, series } = s;
+      leftInfo[i] = {
+        name,
+        color: color || defaultValue.color,
+        data: series[dataArea],
+      };
+    });
+
+    return leftInfo;
+  }
+
+  /**
+   * 현재 mouseover에 대한 x축의 영역에 대한 right축에 종속된 데이터 정보 반환
+   * @param dataArea {number} - mouseover x축 영역
+   * @returns rightInfo - right축에 대한 데이터의 정보 배열
+   */
+  private innerInfoRightData(dataArea: number) {
+    const rightInfo: { name: string; color: string; data: number }[] = [];
+    const { series, defaultValue } = this;
+    if (series === null) return rightInfo;
+
+    series.right.forEach((s: AxisChartType.SeriesType, i: number) => {
+      const { name, series, color } = s;
+      rightInfo[i] = {
+        name,
+        color: color || defaultValue.color,
+        data: series[dataArea],
+      };
+    });
+
+    return rightInfo;
+  }
+
+  /**
+   * draw tooltip
+   * @param x {number} mouse x좌표
+   * @param y {number} mouse y좌표
+   * @param outputPosX {number} tooltip이 표시될 x좌표
+   * @param outputPosY {number} tooltip이 표시될 y좌표
+   */
+  protected tooltipMaker(
+    x: number,
+    y: number,
+    outputPosX: number,
+    outputPosY: number,
+  ) {
+    const { area, tooltip, elementArea, tooltipTemplate, axis, defaultValue } =
+      this;
+    if (axis === null || tooltip === null || tooltipTemplate === null) return;
+
+    if (
+      area.start.x <= x &&
+      area.end.x >= x &&
+      area.start.y >= y &&
+      area.end.y <= y
+    ) {
+      // x축 정보
+      const xAxisArea = Math.floor(
+        (x - area.start.x + elementArea.bottom / 2) / elementArea.bottom,
+      );
+      // left y축 정보
+      const leftAxisInfo = Math.floor(
+        (area.start.y - y + elementArea.left / 2) / elementArea.left,
+      );
+
+      // 현재 마우스 좌표에 대한 x축, series 정보
+      const bottomAxisInfo = this.innerInfoBottomAxis(xAxisArea);
+      const leftDataInfo = this.innerInfoLeftData(xAxisArea);
+      const rightDataInfo = this.innerInfoRightData(xAxisArea);
+
+      let template = `
+      <div style='color: ${axis.bottom.color || defaultValue.color};'>${
+        axis.bottom.name || 'X axis'
+      }: ${bottomAxisInfo || 0}</div>
+      <div style='color: ${axis.left.color || defaultValue.color};'>${
+        axis.left.name || 'left Y axis'
+      }: ${leftAxisInfo}</div>
+      `;
+
+      if (axis.right !== undefined) {
+        // right y축 정보
+        const rightAxisInfo = Math.floor(
+          (area.start.y - y + elementArea.right / 2) / elementArea.right,
+        );
+
+        template = `
+            ${template}
+            <div style='color: ${axis.right?.color || defaultValue.color};'>${
+          axis.right?.name || 'right Y axis'
+        }: ${rightAxisInfo}</div>
+          `;
+      }
+      template = `
+          ${template}
+          <hr/>
+        `;
+
+      if (x >= this.middlePosition) {
+        tooltip.style.left = `${outputPosX - tooltip.clientWidth - 25}px`;
+      } else {
+        tooltip.style.left = `${outputPosX + 25}px`;
+      }
+
+      tooltip.style.display = 'block';
+      tooltip.style.top = `${outputPosY + 25}px`;
+      leftDataInfo.forEach(
+        (info: { name: string; color: string; data: number }) => {
+          const { name, data, color } = info;
+          template = `
+              ${template}
+              <div style='color: ${color}'}>${name}: ${data || 0}</div>
+            `;
+        },
+      );
+      rightDataInfo.forEach(
+        (info: { name: string; color: string; data: number }) => {
+          const { name, data, color } = info;
+          template = `
+              ${template}
+              <div style='color: ${color}'}>${name}: ${data || 0}</div>
+            `;
+        },
+      );
+      template = tooltipTemplate.replace('{__contents__}', template);
+      tooltip.style.alignItems = 'left';
+      tooltip.innerHTML = template;
+
+      return;
+    }
+    tooltip.style.display = 'none';
+  }
+
+  /**
+   * 마우스 커서의 가이드라인 출력
+   * @param x - 마우스 좌표 x
+   * @param y - 마우스 좌표 y
+   */
+  protected drawGuidelines(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+  ) {
+    const { area, defaultValue } = this;
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setLineDash([7]);
+    ctx.strokeStyle = defaultValue.color;
+    ctx.lineWidth = 1;
+
+    if (
+      area.start.x <= x &&
+      area.end.x >= x &&
+      area.start.y >= y &&
+      area.end.y <= y
+    ) {
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, area.start.y);
+      ctx.lineTo(x + 0.5, area.end.y);
+      ctx.stroke();
+      ctx.moveTo(area.start.x, y + 0.5);
+      ctx.lineTo(area.end.x, y + 0.5);
+      ctx.stroke();
+      ctx.closePath();
+    }
+    ctx.restore();
+  }
+
+  protected mouseout() {
+    const { canvasLayer, animationChartIdx, renderOption } = this;
+    const { canvas, ctx } = canvasLayer[animationChartIdx];
+    const mouseout = () => {
+      if (ctx && renderOption.guideLine) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      if (this.tooltip) {
+        this.tooltip.style.display = 'none';
+      }
+    };
+    if (canvas) {
+      canvas.addEventListener('mouseout', mouseout);
+    }
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener('mouseout', mouseout);
+      }
+    };
+  }
+
+  /**
+   * canvas 마우스 이벤트 등록
+   */
+  protected drawMouseOver(): (() => void) | null {
+    const { canvasLayer, mainChartIdx, animationChartIdx } = this;
+    const mainCanvas = canvasLayer[mainChartIdx].canvas;
+    const { canvas: animationCanvas, ctx: animationCtx } =
+      canvasLayer[animationChartIdx];
+
+    if (animationCtx === null) return null;
+
+    const mouseEvent = (e: MouseEvent) => {
+      const loc = this.mousePosition(mainCanvas, e.clientX, e.clientY);
+      if (this.renderOption.guideLine === true) {
+        // 가이드라인 렌더
+        this.drawGuidelines(
+          animationCanvas,
+          animationCtx,
+          crispPixel(loc.x),
+          crispPixel(loc.y),
+        );
+      }
+      if (this.renderOption.tooltip) {
+        // tooltip 렌더
+
+        this.tooltipTemplate = `
+          <div style='padding: 16px;border: 1px solid rgb(177, 177, 177);background: #FFFFFF;border-radius: 5px;font-size: 14px;'>{__contents__}</div>
+        `;
+        this.tooltipMaker(loc.x, loc.y, e.pageX, e.pageY);
+      }
+    };
+
+    if (animationCanvas) {
+      animationCanvas.addEventListener('mousemove', mouseEvent);
+    }
+    return () => {
+      animationCanvas?.removeEventListener('mousemove', mouseEvent);
+    };
+  }
+
+  /**
+   * canvas reactive
+   */
+  protected canvasResize(run?: () => void): () => void {
+    const { legend, canvasLayer, mainChartIdx } = this;
+    const resizeEvent = throttle(() => {
+      this.correctionCanvas();
+      if (run) {
+        run();
+      }
+      if (legend) {
+        legend.style.marginTop = `${
+          canvasLayer[mainChartIdx].canvas.height - 30
+        }px`;
+      }
+    }, 800);
+
+    window.addEventListener('resize', resizeEvent);
+    return () => {
+      window.removeEventListener('resize', resizeEvent);
+    };
   }
 }
 

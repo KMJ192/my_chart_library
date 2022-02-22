@@ -2,11 +2,16 @@ import { DataParamType, AxisParamType } from '../AxisTypeChartTypes';
 
 interface LineChartParam {
   node: HTMLElement;
-  series: DataParamType;
-  axis: AxisParamType;
-  dataLength: number;
+  point?: number;
+  font?: string;
+  fontHeight: number;
   width?: number;
   height?: number;
 }
 
-export { LineChartParam };
+interface InitializeDataParam {
+  series: DataParamType;
+  axis: AxisParamType;
+}
+
+export { LineChartParam, InitializeDataParam };
