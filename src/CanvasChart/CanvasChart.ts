@@ -59,7 +59,7 @@ class CanvasChart {
      */
     this.canvasContainer = document.createElement('div');
 
-    this.canvasContainer.style.display = 'relative';
+    this.canvasContainer.style.position = 'relative';
 
     const dpr = window.devicePixelRatio;
 
@@ -88,6 +88,7 @@ class CanvasChart {
       this.canvasLayer[idx].ctx = this.canvasLayer[idx].canvas.getContext('2d');
       this.canvasLayer[idx].canvas.style.position = 'absolute';
       this.canvasLayer[idx].canvas.style.width = '100%';
+
       // anti aliasing 보정
       this.canvasLayer[idx].canvas.width = width * dpr;
       this.canvasLayer[idx].canvas.height = height * dpr;

@@ -348,7 +348,6 @@ class AxisTypeChart extends CanvasChart {
       startPoint,
       fontHeight,
       mainChartIdx,
-      defaultValue,
       renderOption,
     } = this;
     const { ctx } = canvasLayer[mainChartIdx];
@@ -356,17 +355,17 @@ class AxisTypeChart extends CanvasChart {
 
     ctx.save();
 
-    const tickSize = axis.bottom.tickSize || 0;
-    const tick = ticks.bottom || 0;
+    const tickSize = axis.bottom.tickSize;
+    const tick = ticks.bottom;
 
     ctx.beginPath();
-    const lineWidth = axis.bottom.lineWidth || defaultValue.lineWidth;
+    const lineWidth = axis.bottom.lineWidth;
     if (renderOption.bottomTick) {
       const xPoint = crispPixel(startPoint.bottom.x, lineWidth);
       const yPoint = startPoint.bottom.y;
 
-      ctx.strokeStyle = axis.bottom.color || defaultValue.color;
-      ctx.lineWidth = axis.bottom.lineWidth || defaultValue.lineWidth;
+      ctx.strokeStyle = axis.bottom.color;
+      ctx.lineWidth = axis.bottom.lineWidth;
       ctx.moveTo(xPoint, yPoint);
       ctx.lineTo(xPoint, yPoint + tickSize);
       ctx.stroke();
@@ -386,7 +385,7 @@ class AxisTypeChart extends CanvasChart {
 
     if (renderOption.bottomText) {
       ctx.font = font;
-      ctx.fillStyle = axis.bottom.color || defaultValue.color;
+      ctx.fillStyle = axis.bottom.color;
       ctx.fillText(
         value,
         startPoint.bottom.x - ctx.measureText('0').width / 2,
@@ -409,11 +408,17 @@ class AxisTypeChart extends CanvasChart {
         ctx.lineTo(xPoint, yPoint + tickSize);
         ctx.stroke();
       }
-      const value: string = axis.bottom.data
-        ? String(axis.bottom.data[i + 1])
-        : String(
-            (i + 1) * (axis.bottom.unitsPerTick || defaultValue.unitsPerTick),
-          );
+
+      let value = '';
+      if (axis.bottom.data && axis.bottom.data.length > 1) {
+        if (i === tick - 1) {
+          value = String(axis.bottom.data[axis.bottom.data.length - 1]);
+        } else {
+          value = String(axis.bottom.data[i + 1]);
+        }
+      } else {
+        value = String((i + 1) * axis.bottom.unitsPerTick);
+      }
 
       if (axis.bottom.data.length === 0) {
         // x축 data배열이 없다면 채워준다
@@ -467,23 +472,20 @@ class AxisTypeChart extends CanvasChart {
       const xPount = startPoint.left.x;
       const yPoint = crispPixel(startPoint.left.y, lineWidth);
 
-      ctx.strokeStyle = axis.left.color || defaultValue.color;
+      ctx.strokeStyle = axis.left.color;
       ctx.lineWidth = lineWidth;
 
       ctx.moveTo(xPount, yPoint);
-      ctx.lineTo(xPount - (axis.left.tickSize || 0), yPoint);
+      ctx.lineTo(xPount - axis.left.tickSize, yPoint);
       ctx.stroke();
     }
 
     if (renderOption.leftText) {
       ctx.font = font;
-      ctx.fillStyle = axis.left.color || defaultValue.color;
+      ctx.fillStyle = axis.left.color;
       ctx.fillText(
         String(axis.left.min),
-        startPoint.left.x -
-          (axis.left.tickSize || 0) -
-          ctx.measureText('0').width -
-          7,
+        startPoint.left.x - axis.left.tickSize - ctx.measureText('0').width - 7,
         startPoint.left.y + fontHeight / 2,
       );
       ctx.closePath();
@@ -498,24 +500,20 @@ class AxisTypeChart extends CanvasChart {
       ctx.beginPath();
       if (renderOption.leftTick) {
         ctx.moveTo(xPoint, yPoint);
-        ctx.lineTo(xPoint - (axis.left.tickSize || 0), yPoint);
+        ctx.lineTo(xPoint - axis.left.tickSize, yPoint);
         ctx.stroke();
       }
 
       if (renderOption.leftText) {
-        const value = String(
-          i * (axis.left.unitsPerTick || defaultValue.unitsPerTick) +
-            (axis.left.min || 0),
-        );
+        const value = String(i * axis.left.unitsPerTick + axis.left.min);
         ctx.fillText(
           value,
-          xPoint - (axis.left.tickSize || 0) - ctx.measureText(value).width - 7,
+          xPoint - axis.left.tickSize - ctx.measureText(value).width - 7,
           yPoint + fontHeight / 2,
         );
       }
       ctx.closePath();
     }
-
     ctx.restore();
   }
 
@@ -537,7 +535,6 @@ class AxisTypeChart extends CanvasChart {
       ticks,
       font,
       fontHeight,
-      defaultValue,
       renderOption,
     } = this;
     const { ctx } = canvasLayer[mainChartIdx];
@@ -546,33 +543,33 @@ class AxisTypeChart extends CanvasChart {
     ctx.save();
     ctx.beginPath();
 
-    const lineWidth = axis.right?.lineWidth || defaultValue.lineWidth;
+    const lineWidth = axis.right.lineWidth;
     if (renderOption.rightTick) {
       const xPoint = startPoint.right.x;
       const yPoint = crispPixel(startPoint.right.y, lineWidth);
 
-      ctx.strokeStyle = axis.right?.color || defaultValue.color;
+      ctx.strokeStyle = axis.right.color;
       ctx.lineWidth = lineWidth;
       ctx.moveTo(xPoint, yPoint);
-      ctx.lineTo(xPoint + (axis.right?.tickSize || 0), yPoint);
+      ctx.lineTo(xPoint + axis.right.tickSize, yPoint);
     }
 
     if (renderOption.rightText) {
       ctx.font = font;
-      ctx.fillStyle = axis.right?.color || defaultValue.color;
+      ctx.fillStyle = axis.right.color;
       ctx.stroke();
       ctx.fillText(
         String(axis.right.min),
-        startPoint.right.x + (axis.right?.tickSize || 0) + 7,
+        startPoint.right.x + axis.right.tickSize + 7,
         startPoint.right.y + fontHeight / 2,
       );
     }
     ctx.closePath();
 
-    for (let i = 1; i <= (ticks.right || 0); i++) {
+    for (let i = 1; i <= ticks.right; i++) {
       const xPoint = startPoint.right.x;
       const yPoint = crispPixel(
-        startPoint.right.y - (i * height) / (ticks.right || 0),
+        startPoint.right.y - (i * height) / ticks.right,
         lineWidth,
       );
 
@@ -580,17 +577,15 @@ class AxisTypeChart extends CanvasChart {
 
       if (renderOption.rightTick) {
         ctx.moveTo(xPoint, yPoint);
-        ctx.lineTo(xPoint + (axis.right?.tickSize || 0), yPoint);
+        ctx.lineTo(xPoint + axis.right.tickSize, yPoint);
         ctx.stroke();
       }
 
       if (renderOption.rightText) {
-        const value = String(
-          i * (axis.right?.unitsPerTick || 1) + (axis.right?.min || 0),
-        );
+        const value = String(i * axis.right.unitsPerTick + axis.right.min);
         ctx.fillText(
           value,
-          xPoint + (axis.right?.tickSize || 0) + 7,
+          xPoint + axis.right.tickSize + 7,
           yPoint + fontHeight / 2,
         );
       }

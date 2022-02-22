@@ -31,7 +31,7 @@ function LineChartComponent({ series, axis, renderOption }: Props) {
   });
 
   return `
-    <div id='layer'></div>
+    <div id='layer' style='background-color: #FAFAFA; width: 1440px; height: 100%;'></div>
   `;
 }
 
