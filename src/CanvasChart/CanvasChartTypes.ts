@@ -17,7 +17,7 @@ interface Vector {
 }
 
 interface CanvasChartParam {
-  node: HTMLElement;
+  nodeId: string;
   width: number;
   height: number;
   canvasLayer: CanvasLayer[];

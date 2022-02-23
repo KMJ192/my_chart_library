@@ -5,6 +5,10 @@ class CanvasChart {
   /**
    * HTML5 Canvas 설정
    */
+  protected parentNode: HTMLElement | null;
+
+  protected parentNodeId: string;
+
   protected canvasContainer: HTMLElement | null;
 
   protected canvasLayer: CanvasChartTypes.CanvasLayerType[];
@@ -14,8 +18,6 @@ class CanvasChart {
   protected tooltipTemplate: string | null;
 
   protected legend: HTMLElement | null;
-
-  protected defaultValue: GlobalType.ObjectType;
 
   protected events: Array<any>;
 
@@ -27,8 +29,10 @@ class CanvasChart {
 
   protected animationChartIdx: number;
 
+  protected defaultValue: GlobalType.ObjectType;
+
   constructor({
-    node,
+    nodeId,
     width,
     height,
     canvasLayer,
@@ -42,10 +46,6 @@ class CanvasChart {
       unitsPerTick: 1,
       font: 'normal 12px sans-serif',
       fontHeight: 12,
-      tooltipId: 'chart-tooltip',
-      staticCanvasId: 'line-chart',
-      eventCanvasId: 'event-canvas',
-      legendId: 'chart-legend',
       background: '#FFF',
       pointRadius: 3,
     };
@@ -53,6 +53,10 @@ class CanvasChart {
     this.mainChartIdx = 0;
 
     this.animationChartIdx = 0;
+
+    this.parentNode = null;
+
+    this.parentNodeId = nodeId;
 
     /**
      * canvas 레이어 설정
@@ -107,8 +111,6 @@ class CanvasChart {
     this.tooltipTemplate = null;
 
     this.legend = null;
-
-    node.appendChild(this.canvasContainer);
   }
 
   /**
@@ -141,7 +143,9 @@ class CanvasChart {
    * @param y - mouseover이벤트의 e.clientY
    * @returns - 마우스 좌표
    */
-  protected mousePosition(canvas: HTMLCanvasElement, x: number, y: number) {
+  protected mousePosition(x: number, y: number) {
+    const { canvasLayer, mainChartIdx } = this;
+    const { canvas } = canvasLayer[mainChartIdx];
     const bbox = canvas.getBoundingClientRect();
     return {
       x: Math.floor(x - (bbox.left * canvas.width) / bbox.width),
@@ -189,18 +193,26 @@ class CanvasChart {
    * event함수를 관리하는 events 배열
    * @param eventFunc
    */
-  protected addEvents = (...eventFunc: any) => {
-    this.events = [eventFunc];
-  };
+  protected addEvents(eventFunc: Array<any>) {
+    this.events = eventFunc;
+  }
 
   /**
    * event remove
    */
-  protected removeEvents = () => {
+  protected removeEvents() {
     this.events.forEach((removeEvent: (() => void) | null) => {
       if (removeEvent) removeEvent();
     });
-  };
+  }
+
+  protected appendCanvasNode() {
+    this.parentNode = document.getElementById(this.parentNodeId);
+    if (this.parentNode !== null && this.canvasContainer !== null) {
+      this.parentNode.innerHTML = '';
+      this.parentNode.appendChild(this.canvasContainer);
+    }
+  }
 }
 
 export default CanvasChart;

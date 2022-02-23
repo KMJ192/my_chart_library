@@ -39,15 +39,14 @@ class AxisTypeChart extends CanvasChart {
   };
 
   constructor({
-    node,
+    nodeId,
     canvasLayer,
     width,
     height,
     font,
     fontHeight,
   }: AxisChartType.AxisTypeChartParam) {
-    super({ node, width, height, canvasLayer });
-
+    super({ nodeId, width, height, canvasLayer });
     this.series = null;
 
     this.axis = null;
@@ -248,20 +247,18 @@ class AxisTypeChart extends CanvasChart {
     };
 
     this.scale = this.width / this.range.bottom;
+    if (this.scale === Infinity) {
+      this.scale = 1;
+    }
 
     this.elementArea = {
-      bottom: Math.floor(
-        (this.area.end.x - this.area.start.x) / this.range.bottom,
-      ),
-      left: Math.floor((this.area.start.y - this.area.end.y) / this.range.left),
-      right: Math.floor(
-        (this.area.start.y - this.area.end.y) / this.range.right,
-      ),
+      bottom: (this.area.end.x - this.area.start.x) / this.range.bottom,
+      left: (this.area.start.y - this.area.end.y) / this.range.left,
+      right: (this.area.start.y - this.area.end.y) / this.range.right,
     };
 
-    this.middlePosition = Math.floor(
-      this.area.start.x + (this.area.end.x - this.area.start.x) / 2,
-    );
+    this.middlePosition =
+      this.area.start.x + (this.area.end.x - this.area.start.x) / 2;
   }
 
   /**
@@ -355,11 +352,11 @@ class AxisTypeChart extends CanvasChart {
 
     ctx.save();
 
-    const tickSize = axis.bottom.tickSize;
+    const { tickSize } = axis.bottom;
     const tick = ticks.bottom;
 
     ctx.beginPath();
-    const lineWidth = axis.bottom.lineWidth;
+    const { lineWidth } = axis.bottom;
     if (renderOption.bottomTick) {
       const xPoint = crispPixel(startPoint.bottom.x, lineWidth);
       const yPoint = startPoint.bottom.y;
@@ -543,7 +540,7 @@ class AxisTypeChart extends CanvasChart {
     ctx.save();
     ctx.beginPath();
 
-    const lineWidth = axis.right.lineWidth;
+    const { lineWidth } = axis.right;
     if (renderOption.rightTick) {
       const xPoint = startPoint.right.x;
       const yPoint = crispPixel(startPoint.right.y, lineWidth);
@@ -566,10 +563,10 @@ class AxisTypeChart extends CanvasChart {
     }
     ctx.closePath();
 
-    for (let i = 1; i <= ticks.right; i++) {
+    for (let i = 0; i < ticks.right; i++) {
       const xPoint = startPoint.right.x;
       const yPoint = crispPixel(
-        startPoint.right.y - (i * height) / ticks.right,
+        startPoint.right.y - ((i + 1) * height) / ticks.right,
         lineWidth,
       );
 
@@ -582,7 +579,9 @@ class AxisTypeChart extends CanvasChart {
       }
 
       if (renderOption.rightText) {
-        const value = String(i * axis.right.unitsPerTick + axis.right.min);
+        const value = String(
+          (i + 1) * axis.right.unitsPerTick + axis.right.min,
+        );
         ctx.fillText(
           value,
           xPoint + axis.right.tickSize + 7,
@@ -600,16 +599,19 @@ class AxisTypeChart extends CanvasChart {
    * tooltip 생성
    */
   protected tooltipSetting() {
-    if (this.renderOption.tooltip && this.createdNode.tooltip === false) {
+    if (
+      this.renderOption.tooltip &&
+      this.createdNode.tooltip === false &&
+      this.parentNode !== null
+    ) {
       this.tooltip = document.createElement('div');
-      this.tooltip.id = this.defaultValue.tooltipId;
       this.tooltip.style.position = 'absolute';
       this.tooltip.style.display = 'none';
       this.tooltip.style.width = 'auto';
       this.tooltip.style.height = 'auto';
       this.tooltip.style.zIndex = '10';
-      this.canvasContainer?.appendChild(this.tooltip);
       this.createdNode.tooltip = true;
+      this.parentNode.insertAdjacentElement('beforeend', this.tooltip);
     }
   }
 
@@ -617,19 +619,18 @@ class AxisTypeChart extends CanvasChart {
    * Draw legend
    */
   protected drawLegend() {
-    if (this.renderOption.legend === true) {
-      if (this.createdNode.legend === false) {
-        this.legend = document.createElement('div');
-        this.legend.style.position = 'absolute';
-        this.legend.style.display = 'flex';
-        this.legend.style.left = '50%';
-        this.legend.style.marginTop = `${
-          this.canvasLayer[this.mainChartIdx].canvas.height - 30
-        }px`;
-        this.legend.style.transform = 'translate(-50%, 0%)';
-        this.canvasContainer?.appendChild(this.legend);
-        this.createdNode.legend = true;
-      }
+    if (
+      this.renderOption.legend === true &&
+      this.createdNode.legend === false
+    ) {
+      this.legend = document.createElement('div');
+      this.legend.style.position = 'absolute';
+      this.legend.style.display = 'flex';
+      this.legend.style.left = '50%';
+      this.legend.style.marginTop = `${this.height + 50}px`;
+      this.legend.style.transform = 'translate(-50%, 0%)';
+      this.canvasContainer?.appendChild(this.legend);
+      this.createdNode.legend = true;
     }
 
     const { legend, series } = this;
@@ -749,14 +750,16 @@ class AxisTypeChart extends CanvasChart {
       area.end.y <= y
     ) {
       // x축 정보
-      const xAxisArea = Math.floor(
-        (x - area.start.x + elementArea.bottom / 2) / elementArea.bottom,
-      );
+      const xAxisArea =
+        Number(
+          (
+            (x - area.start.x + elementArea.bottom / 2) /
+            elementArea.bottom
+          ).toFixed(0),
+        ) - 1;
       // left y축 정보
-      const leftAxisInfo = Math.floor(
-        (area.start.y - y + elementArea.left / 2) / elementArea.left,
-      );
-
+      const leftAxisInfo =
+        (area.start.y - y + elementArea.left / 2) / elementArea.left;
       // 현재 마우스 좌표에 대한 x축, series 정보
       const bottomAxisInfo = this.innerInfoBottomAxis(xAxisArea);
       const leftDataInfo = this.innerInfoLeftData(xAxisArea);
@@ -768,26 +771,19 @@ class AxisTypeChart extends CanvasChart {
       }: ${bottomAxisInfo || 0}</div>
       <div style='color: ${axis.left.color || defaultValue.color};'>${
         axis.left.name || 'left Y axis'
-      }: ${leftAxisInfo}</div>
+      }: ${leftAxisInfo.toFixed(0)}</div>
       `;
 
-      if (axis.right !== undefined) {
-        // right y축 정보
-        const rightAxisInfo = Math.floor(
-          (area.start.y - y + elementArea.right / 2) / elementArea.right,
-        );
-
-        template = `
-            ${template}
-            <div style='color: ${axis.right?.color || defaultValue.color};'>${
+      // right y축 정보
+      const rightAxisInfo =
+        (area.start.y - y + elementArea.right / 2) / elementArea.right;
+      if (!Number.isNaN(rightAxisInfo)) {
+        template = `${template}
+          <div style='color: ${axis.right?.color || defaultValue.color};'>${
           axis.right?.name || 'right Y axis'
-        }: ${rightAxisInfo}</div>
-          `;
+        }: ${rightAxisInfo.toFixed(0)}</div>`;
       }
-      template = `
-          ${template}
-          <hr/>
-        `;
+      template = `${template}<hr/>`;
 
       if (x >= this.middlePosition) {
         tooltip.style.left = `${outputPosX - tooltip.clientWidth - 25}px`;
@@ -885,23 +881,17 @@ class AxisTypeChart extends CanvasChart {
    * canvas 마우스 이벤트 등록
    */
   protected drawMouseOver(): (() => void) | null {
-    const { canvasLayer, mainChartIdx, animationChartIdx } = this;
-    const mainCanvas = canvasLayer[mainChartIdx].canvas;
+    const { canvasLayer, animationChartIdx } = this;
     const { canvas: animationCanvas, ctx: animationCtx } =
       canvasLayer[animationChartIdx];
 
     if (animationCtx === null) return null;
 
     const mouseEvent = (e: MouseEvent) => {
-      const loc = this.mousePosition(mainCanvas, e.clientX, e.clientY);
+      const loc = this.mousePosition(e.clientX, e.clientY);
       if (this.renderOption.guideLine === true) {
         // 가이드라인 렌더
-        this.drawGuidelines(
-          animationCanvas,
-          animationCtx,
-          crispPixel(loc.x),
-          crispPixel(loc.y),
-        );
+        this.drawGuidelines(animationCanvas, animationCtx, loc.x, loc.y);
       }
       if (this.renderOption.tooltip) {
         // tooltip 렌더
@@ -925,16 +915,14 @@ class AxisTypeChart extends CanvasChart {
    * canvas reactive
    */
   protected canvasResize(run?: () => void): () => void {
-    const { legend, canvasLayer, mainChartIdx } = this;
+    const { legend } = this;
     const resizeEvent = throttle(() => {
       this.correctionCanvas();
       if (run) {
         run();
       }
       if (legend) {
-        legend.style.marginTop = `${
-          canvasLayer[mainChartIdx].canvas.height - 30
-        }px`;
+        legend.style.marginTop = `${this.height + 50}px`;
       }
     }, 800);
 

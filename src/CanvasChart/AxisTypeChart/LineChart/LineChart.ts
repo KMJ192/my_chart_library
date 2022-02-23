@@ -1,20 +1,21 @@
-import AxisTypeChart from '@src/CanvasChart/AxisTypeChart';
-import * as AxisChartType from '@src/CanvasChart/AxisTypeChart/AxisTypeChartTypes';
+import AxisTypeChart from '../AxisTypeChart';
+import * as AxisChartType from '../AxisTypeChartTypes';
 import * as LineChartType from './LineChartTypes';
 
 class LineChart extends AxisTypeChart {
   private pointRadius: number;
 
   constructor({
-    node,
+    nodeId,
     width,
     height,
     point,
     font,
     fontHeight,
+    canvasStyle,
   }: LineChartType.LineChartParam) {
     super({
-      node,
+      nodeId,
       width: width || 1800,
       height: height || 700,
       font,
@@ -23,12 +24,7 @@ class LineChart extends AxisTypeChart {
         {
           type: 'main',
           id: 'data-graph',
-          canvasStyle: {},
-        },
-        {
-          type: 'static',
-          id: 'line-expression',
-          canvasStyle: {},
+          canvasStyle: canvasStyle || {},
         },
         {
           type: 'animation',
@@ -82,7 +78,6 @@ class LineChart extends AxisTypeChart {
           ctx.lineTo(xPoint, yPoint);
           ctx.stroke();
         }
-
         if (pointRadius > 0) {
           ctx.beginPath();
           ctx.arc(xPoint, yPoint, pointRadius, 0, 2 * Math.PI, false);
@@ -131,7 +126,10 @@ class LineChart extends AxisTypeChart {
       const datas = Array.from(series).reverse();
       for (let i = 0; i < datas.length; i++) {
         const data = datas[i];
-        const xPoint = startPoint.right.x - i * scale;
+        const xPoint =
+          datas.length === 1
+            ? startPoint.right.x - i * scale - this.width
+            : startPoint.right.x - i * scale;
         const yPoint = Math.floor(
           startPoint.right.y - ((data - axis.right.min) * height) / range.right,
         );
@@ -153,7 +151,7 @@ class LineChart extends AxisTypeChart {
     ctx.restore();
   }
 
-  private draw = () => {
+  private draw() {
     this.ctxClear();
     this.calcMax();
     this.calcRelation();
@@ -163,49 +161,44 @@ class LineChart extends AxisTypeChart {
     this.drawRightTickAndText();
     this.drawLeftLine();
     this.drawRightLine();
-  };
+  }
 
   public dataInitialize({ series, axis }: LineChartType.InitializeDataParam) {
+    this.appendCanvasNode();
+
     this.series = {
       left: [],
       right: [],
     };
-
-    series.left.forEach(
-      (series: AxisChartType.SeriesParamType, idx: number) => {
-        if (this.series !== null)
-          this.series.left[idx] = {
-            name: series.name,
-            series: series.series,
-            color: series.color || this.defaultValue.color,
-            lineWidth: series.lineWidth || 1,
-          };
-      },
-    );
-
-    series.right?.forEach(
-      (series: AxisChartType.SeriesParamType, idx: number) => {
-        if (this.series !== null)
-          this.series.right[idx] = {
-            name: series.name,
-            series: series.series,
-            color: series.color || this.defaultValue.color,
-            lineWidth: series.lineWidth || 1,
-          };
-      },
-    );
-
+    series.left.forEach((s: AxisChartType.SeriesParamType, idx: number) => {
+      if (this.series !== null)
+        this.series.left[idx] = {
+          name: s.name,
+          series: s.series,
+          color: s.color || this.defaultValue.color,
+          lineWidth: s.lineWidth || 1,
+        };
+    });
+    series.right?.forEach((s: AxisChartType.SeriesParamType, idx: number) => {
+      if (this.series !== null)
+        this.series.right[idx] = {
+          name: s.name,
+          series: s.series,
+          color: s.color || this.defaultValue.color,
+          lineWidth: s.lineWidth || 1,
+        };
+    });
     this.axis = {
       left: {
-        name: axis.left.name || '',
-        unitsPerTick: axis.left.unitsPerTick || 1,
-        max: axis.left.max || 0,
-        min: axis.left.min || 0,
-        padding: axis.left.padding || this.defaultValue.padding,
-        tickSize: axis.left.tickSize || 0,
-        tickColor: axis.left.tickColor || this.defaultValue.color,
-        lineWidth: axis.left.lineWidth || 1,
-        color: axis.left.color || this.defaultValue.color,
+        name: axis.left?.name || '',
+        unitsPerTick: axis.left?.unitsPerTick || 1,
+        max: axis.left?.max || 0,
+        min: axis.left?.min || 0,
+        padding: axis.left?.padding || this.defaultValue.padding,
+        tickSize: axis.left?.tickSize || 0,
+        tickColor: axis.left?.tickColor || this.defaultValue.color,
+        lineWidth: axis.left?.lineWidth || 1,
+        color: axis.left?.color || this.defaultValue.color,
       },
       bottom: {
         name: axis.bottom.name || '',
@@ -233,17 +226,32 @@ class LineChart extends AxisTypeChart {
     };
   }
 
-  public render(renderOption?: AxisChartType.RenderOption) {
+  public render(
+    renderOption?: AxisChartType.RenderOption,
+  ): (() => void) | null {
+    if (this.parentNode === null) return null;
     if (renderOption) {
-      this.renderOption = renderOption;
+      this.renderOption = {
+        ...this.renderOption,
+        ...renderOption,
+      };
     }
-
+    if (this.renderOption.legend === true) {
+      if (this.axis?.bottom) {
+        this.axis.bottom = {
+          ...this.axis.bottom,
+          padding: 30,
+        };
+      }
+    }
     this.tooltipSetting();
     this.correctionCanvas();
     this.draw();
     this.drawLegend();
     this.addEvents([
-      this.canvasResize(this.draw),
+      this.canvasResize(() => {
+        this.draw();
+      }),
       this.drawMouseOver(),
       this.mouseout(),
     ]);

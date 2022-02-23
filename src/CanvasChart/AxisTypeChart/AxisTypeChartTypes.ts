@@ -28,7 +28,7 @@ interface AxisType {
 }
 
 interface AxisParamType {
-  left: AxisParamInfo;
+  left?: AxisParamInfo;
   right?: AxisParamInfo;
   bottom: BottomAxisParamInfo;
 }
