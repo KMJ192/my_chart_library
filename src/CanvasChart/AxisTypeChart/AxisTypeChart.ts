@@ -1,5 +1,5 @@
 import { throttle } from 'lodash';
-import { crispPixel } from '@src/untils';
+import { crispPixel } from '../../untils';
 
 import CanvasChart from '../CanvasChart';
 import * as CanvasChartTypes from '../CanvasChartTypes';
@@ -15,8 +15,6 @@ class AxisTypeChart extends CanvasChart {
   protected fontHeight: number;
 
   protected range: AxisChartType.AxisPositionType<number>;
-
-  protected ticks: AxisChartType.AxisPositionType<number>;
 
   protected scale: number;
 
@@ -56,12 +54,6 @@ class AxisTypeChart extends CanvasChart {
     this.fontHeight = fontHeight || this.defaultValue.fontHeight;
 
     this.range = {
-      bottom: 0,
-      left: 0,
-      right: 0,
-    };
-
-    this.ticks = {
       bottom: 0,
       left: 0,
       right: 0,
@@ -164,7 +156,6 @@ class AxisTypeChart extends CanvasChart {
       mainChartIdx,
       axis,
       range,
-      ticks,
       startPoint,
       fontHeight,
       defaultValue,
@@ -198,11 +189,6 @@ class AxisTypeChart extends CanvasChart {
       axis.right.max += axis.right.unitsPerTick - rightMod;
       range.right = axis.right.max - rightMin;
     }
-
-    // tick 갯수 계산
-    ticks.bottom = Math.round(range.bottom / axis.bottom.unitsPerTick);
-    ticks.left = Math.round(range.left / axis.left.unitsPerTick);
-    ticks.right = Math.round(range.right / axis.right.unitsPerTick);
 
     // 축 시작점 계산
     startPoint.bottom.x =
@@ -338,9 +324,9 @@ class AxisTypeChart extends CanvasChart {
       return;
     const {
       canvasLayer,
-      width,
+      range,
+      elementArea,
       axis,
-      ticks,
       font,
       startPoint,
       fontHeight,
@@ -353,47 +339,19 @@ class AxisTypeChart extends CanvasChart {
     ctx.save();
 
     const { tickSize } = axis.bottom;
-    const tick = ticks.bottom;
 
-    ctx.beginPath();
     const { lineWidth } = axis.bottom;
     if (renderOption.bottomTick) {
-      const xPoint = crispPixel(startPoint.bottom.x, lineWidth);
-      const yPoint = startPoint.bottom.y;
-
       ctx.strokeStyle = axis.bottom.color;
       ctx.lineWidth = axis.bottom.lineWidth;
-      ctx.moveTo(xPoint, yPoint);
-      ctx.lineTo(xPoint, yPoint + tickSize);
-      ctx.stroke();
     }
-
-    const value =
-      axis.bottom.data && axis.bottom.data.length > 0
-        ? String(axis.bottom.data[0])
-        : '0';
-
-    // x축 data배열이 없다면 채워준다
-    if (axis.bottom.data === undefined) {
-      axis.bottom.data = [value];
-    } else if (axis.bottom.data.length === 0) {
-      (axis.bottom.data as string[])[0] = value;
-    }
-
     if (renderOption.bottomText) {
       ctx.font = font;
       ctx.fillStyle = axis.bottom.color;
-      ctx.fillText(
-        value,
-        startPoint.bottom.x - ctx.measureText('0').width / 2,
-        startPoint.bottom.y + tickSize + fontHeight,
-      );
     }
-    ctx.closePath();
-
-    for (let i = 0; i < tick; i++) {
+    for (let i = 0; i <= range.bottom; i += axis.bottom.unitsPerTick) {
       const xPoint = crispPixel(
-        ((i + 1) * width) / tick + startPoint.bottom.x,
+        i * elementArea.bottom + startPoint.bottom.x,
         lineWidth,
       );
       const yPoint = startPoint.bottom.y;
@@ -408,18 +366,9 @@ class AxisTypeChart extends CanvasChart {
 
       let value = '';
       if (axis.bottom.data && axis.bottom.data.length > 1) {
-        if (i === tick - 1) {
-          value = String(axis.bottom.data[axis.bottom.data.length - 1]);
-        } else {
-          value = String(axis.bottom.data[i + 1]);
-        }
+        value = String(axis.bottom.data[i]);
       } else {
-        value = String((i + 1) * axis.bottom.unitsPerTick);
-      }
-
-      if (axis.bottom.data.length === 0) {
-        // x축 data배열이 없다면 채워준다
-        (axis.bottom.data as string[])[i] = value;
+        value = String(i);
       }
 
       if (renderOption.bottomText) {
@@ -431,6 +380,39 @@ class AxisTypeChart extends CanvasChart {
         );
       }
       ctx.closePath();
+    }
+
+    // 마지막 요소 출력
+    if (range.bottom % axis.bottom.unitsPerTick !== 0) {
+      const xPoint = crispPixel(
+        axis.bottom.max * elementArea.bottom + startPoint.bottom.x,
+        lineWidth,
+      );
+      const yPoint = startPoint.bottom.y;
+
+      ctx.beginPath();
+
+      if (renderOption.bottomTick) {
+        ctx.moveTo(xPoint, yPoint);
+        ctx.lineTo(xPoint, yPoint + tickSize);
+        ctx.stroke();
+      }
+
+      let value = '';
+      if (axis.bottom.data && axis.bottom.data.length > 1) {
+        value = String(axis.bottom.data[axis.bottom.data.length - 1]);
+      } else {
+        value = String(axis.bottom.max);
+      }
+
+      if (renderOption.bottomText) {
+        const valueLen = ctx.measureText(value).width;
+        ctx.fillText(
+          value,
+          xPoint - valueLen / 2,
+          yPoint + tickSize + fontHeight,
+        );
+      }
     }
 
     ctx.restore();
@@ -448,12 +430,12 @@ class AxisTypeChart extends CanvasChart {
     const {
       canvasLayer,
       mainChartIdx,
-      height,
       startPoint,
+      elementArea,
       font,
       fontHeight,
       axis,
-      ticks,
+      range,
       defaultValue,
       renderOption,
     } = this;
@@ -463,35 +445,21 @@ class AxisTypeChart extends CanvasChart {
     ctx.save();
 
     ctx.beginPath();
-
     const lineWidth = axis.left.lineWidth || defaultValue.lineWidth;
     if (renderOption.leftTick) {
-      const xPount = startPoint.left.x;
-      const yPoint = crispPixel(startPoint.left.y, lineWidth);
-
       ctx.strokeStyle = axis.left.color;
       ctx.lineWidth = lineWidth;
-
-      ctx.moveTo(xPount, yPoint);
-      ctx.lineTo(xPount - axis.left.tickSize, yPoint);
-      ctx.stroke();
     }
 
     if (renderOption.leftText) {
       ctx.font = font;
       ctx.fillStyle = axis.left.color;
-      ctx.fillText(
-        String(axis.left.min),
-        startPoint.left.x - axis.left.tickSize - ctx.measureText('0').width - 7,
-        startPoint.left.y + fontHeight / 2,
-      );
-      ctx.closePath();
     }
 
-    for (let i = 1; i <= ticks.left; i++) {
+    for (let i = 0; i <= range.left; i += axis.left.unitsPerTick) {
       const xPoint = startPoint.left.x;
       const yPoint = crispPixel(
-        startPoint.left.y - (i * height) / ticks.left,
+        startPoint.left.y - i * elementArea.left,
         lineWidth,
       );
       ctx.beginPath();
@@ -502,7 +470,7 @@ class AxisTypeChart extends CanvasChart {
       }
 
       if (renderOption.leftText) {
-        const value = String(i * axis.left.unitsPerTick + axis.left.min);
+        const value = String(axis.left.min + i);
         ctx.fillText(
           value,
           xPoint - axis.left.tickSize - ctx.measureText(value).width - 7,
@@ -511,6 +479,7 @@ class AxisTypeChart extends CanvasChart {
       }
       ctx.closePath();
     }
+
     ctx.restore();
   }
 
@@ -526,10 +495,9 @@ class AxisTypeChart extends CanvasChart {
     const {
       canvasLayer,
       mainChartIdx,
-      height,
+      range,
       startPoint,
       axis,
-      ticks,
       font,
       fontHeight,
       renderOption,
@@ -542,31 +510,20 @@ class AxisTypeChart extends CanvasChart {
 
     const { lineWidth } = axis.right;
     if (renderOption.rightTick) {
-      const xPoint = startPoint.right.x;
-      const yPoint = crispPixel(startPoint.right.y, lineWidth);
-
       ctx.strokeStyle = axis.right.color;
       ctx.lineWidth = lineWidth;
-      ctx.moveTo(xPoint, yPoint);
-      ctx.lineTo(xPoint + axis.right.tickSize, yPoint);
     }
 
     if (renderOption.rightText) {
       ctx.font = font;
       ctx.fillStyle = axis.right.color;
-      ctx.stroke();
-      ctx.fillText(
-        String(axis.right.min),
-        startPoint.right.x + axis.right.tickSize + 7,
-        startPoint.right.y + fontHeight / 2,
-      );
     }
     ctx.closePath();
 
-    for (let i = 0; i < ticks.right; i++) {
+    for (let i = 0; i <= range.right; i += axis.right.unitsPerTick) {
       const xPoint = startPoint.right.x;
       const yPoint = crispPixel(
-        startPoint.right.y - ((i + 1) * height) / ticks.right,
+        startPoint.right.y - i * this.elementArea.right,
         lineWidth,
       );
 
@@ -579,9 +536,7 @@ class AxisTypeChart extends CanvasChart {
       }
 
       if (renderOption.rightText) {
-        const value = String(
-          (i + 1) * axis.right.unitsPerTick + axis.right.min,
-        );
+        const value = String(axis.right.min + i);
         ctx.fillText(
           value,
           xPoint + axis.right.tickSize + 7,
@@ -751,15 +706,13 @@ class AxisTypeChart extends CanvasChart {
     ) {
       // x축 정보
       const xAxisArea =
-        Number(
-          (
-            (x - area.start.x + elementArea.bottom / 2) /
-            elementArea.bottom
-          ).toFixed(0),
+        Math.round(
+          (x - area.start.x + elementArea.bottom) / elementArea.bottom,
         ) - 1;
       // left y축 정보
       const leftAxisInfo =
-        (area.start.y - y + elementArea.left / 2) / elementArea.left;
+        Math.round((area.start.y - y + elementArea.left) / elementArea.left) -
+        1;
       // 현재 마우스 좌표에 대한 x축, series 정보
       const bottomAxisInfo = this.innerInfoBottomAxis(xAxisArea);
       const leftDataInfo = this.innerInfoLeftData(xAxisArea);
@@ -769,21 +722,27 @@ class AxisTypeChart extends CanvasChart {
       <div style='color: ${axis.bottom.color || defaultValue.color};'>${
         axis.bottom.name || 'X axis'
       }: ${bottomAxisInfo || 0}</div>
-      <div style='color: ${axis.left.color || defaultValue.color};'>${
-        axis.left.name || 'left Y axis'
-      }: ${leftAxisInfo.toFixed(0)}</div>
       `;
+
+      if (!Number.isNaN(leftAxisInfo)) {
+        template = `
+        ${template}
+        <div style='color: ${axis.left.color || defaultValue.color};'>${
+          axis.left.name || 'left Y axis'
+        }: ${leftAxisInfo.toFixed(0)}</div>
+        `;
+      }
 
       // right y축 정보
       const rightAxisInfo =
-        (area.start.y - y + elementArea.right / 2) / elementArea.right;
+        Math.round((area.start.y - y + elementArea.right) / elementArea.right) -
+        1;
       if (!Number.isNaN(rightAxisInfo)) {
         template = `${template}
           <div style='color: ${axis.right?.color || defaultValue.color};'>${
           axis.right?.name || 'right Y axis'
         }: ${rightAxisInfo.toFixed(0)}</div>`;
       }
-      template = `${template}<hr/>`;
 
       if (x >= this.middlePosition) {
         tooltip.style.left = `${outputPosX - tooltip.clientWidth - 25}px`;
@@ -793,6 +752,15 @@ class AxisTypeChart extends CanvasChart {
 
       tooltip.style.display = 'block';
       tooltip.style.top = `${outputPosY + 25}px`;
+
+      if (leftDataInfo.length > 0) {
+        template = `
+          ${template}
+          <hr/>
+          ${axis.left.name || 'left Y axis'}
+        `;
+      }
+
       leftDataInfo.forEach(
         (info: { name: string; color: string; data: number }) => {
           const { name, data, color } = info;
@@ -802,6 +770,14 @@ class AxisTypeChart extends CanvasChart {
             `;
         },
       );
+
+      if (rightDataInfo.length > 0) {
+        template = `
+          ${template}
+          <hr/>
+          ${axis.right?.name || 'right Y axis'}
+        `;
+      }
       rightDataInfo.forEach(
         (info: { name: string; color: string; data: number }) => {
           const { name, data, color } = info;

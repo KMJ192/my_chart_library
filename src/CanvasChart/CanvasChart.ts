@@ -202,7 +202,7 @@ class CanvasChart {
    */
   protected removeEvents() {
     this.events.forEach((removeEvent: (() => void) | null) => {
-      if (removeEvent) removeEvent();
+      if (removeEvent !== null) removeEvent();
     });
   }
 
