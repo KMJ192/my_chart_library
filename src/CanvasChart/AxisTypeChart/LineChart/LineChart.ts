@@ -5,6 +5,10 @@ import * as LineChartType from './LineChartTypes';
 class LineChart extends AxisTypeChart {
   private pointRadius: number;
 
+  private prevData: string;
+
+  private rendering: boolean;
+
   constructor({
     nodeId,
     width,
@@ -35,6 +39,10 @@ class LineChart extends AxisTypeChart {
     });
 
     this.pointRadius = point || this.defaultValue.pointRadius;
+
+    this.rendering = true;
+
+    this.prevData = '';
   }
 
   /**
@@ -164,6 +172,12 @@ class LineChart extends AxisTypeChart {
   }
 
   public dataInitialize({ series, axis }: LineChartType.InitializeDataParam) {
+    const nextData = JSON.stringify({ series, axis });
+    if (nextData === this.prevData) {
+      this.rendering = false;
+      return;
+    }
+    this.prevData = nextData;
     this.appendCanvasNode();
 
     this.series = {
@@ -229,7 +243,7 @@ class LineChart extends AxisTypeChart {
   public render(
     renderOption?: AxisChartType.RenderOption,
   ): (() => void) | null {
-    if (this.parentNode === null) return null;
+    if (this.parentNode === null || this.rendering === false) return null;
     if (renderOption) {
       this.renderOption = {
         ...this.renderOption,
