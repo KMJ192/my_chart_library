@@ -871,7 +871,6 @@ class AxisTypeChart extends CanvasChart {
       }
       if (this.renderOption.tooltip) {
         // tooltip 렌더
-
         this.tooltipTemplate = `
           <div style='padding: 16px;border: 1px solid rgb(177, 177, 177);background: #FFFFFF;border-radius: 5px;font-size: 14px;'>{__contents__}</div>
         `;
@@ -880,9 +879,11 @@ class AxisTypeChart extends CanvasChart {
     };
 
     if (animationCanvas) {
+      animationCanvas.addEventListener('mouseenter', mouseEvent);
       animationCanvas.addEventListener('mousemove', mouseEvent);
     }
     return () => {
+      animationCanvas?.removeEventListener('mouseenter', mouseEvent);
       animationCanvas?.removeEventListener('mousemove', mouseEvent);
     };
   }
