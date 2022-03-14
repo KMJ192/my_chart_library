@@ -1,5 +1,5 @@
 import { throttle } from 'lodash';
-import { crispPixel } from '../../untils';
+import { crispPixel } from '../../utils';
 
 import CanvasChart from '../CanvasChart';
 import * as CanvasChartTypes from '../CanvasChartTypes';

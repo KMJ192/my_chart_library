@@ -16,18 +16,6 @@ interface Props {
 function LineChartComponent({ series, axis, renderOption }: Props) {
   useDocument(() => {
     const node = document.getElementById('layer');
-    if (node) {
-      const param = {
-        node,
-        point: 2,
-        font: 'normal bold 12px SpoqaM',
-        fontHeight: 12,
-        renderOption,
-      };
-      const lineChart = new LineChart(param);
-      lineChart.dataInitialize({ series, axis });
-      lineChart.render(renderOption);
-    }
   });
 
   return `

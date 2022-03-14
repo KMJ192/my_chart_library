@@ -14,6 +14,7 @@ const alias = {
   '@router': path.resolve(__dirname, 'custom_modules/router'),
   '@api': path.resolve(__dirname, 'custom_modules/api'),
   '@redux': path.resolve(__dirname, 'custom_modules/redux'),
+  '@wasm': path.resolve(__dirname, 'wasm_module/pkg'),
 };
 
 const postcssLoader = {

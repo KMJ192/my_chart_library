@@ -1,1 +1,1 @@
-#[path="./document_object.rs"] pub mod document_object;
+pub mod document;

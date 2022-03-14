@@ -3,6 +3,7 @@ declare module '@react';
 declare module '@router';
 declare module '@api';
 declare module '@redux';
+declare module '@wasm';
 
 declare module '*.module.css' {
   const classes: { [key: string]: string };

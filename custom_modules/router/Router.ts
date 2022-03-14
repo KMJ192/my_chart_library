@@ -2,6 +2,10 @@ import React from '@react';
 import type { ReactDOM } from 'custom_modules/react';
 import type { RouterType } from './types';
 
+window.addEventListener('popstate', () => {
+  React.routeRenderer();
+});
+
 /**
  * Router
  */
