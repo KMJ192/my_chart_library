@@ -13,3 +13,7 @@ pub struct CanvasChart {
   main_chart_idx: usize,
   animation_chart_idx: usize,
 }
+
+impl CanvasChart {
+
+}
