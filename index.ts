@@ -1,3 +1,3 @@
-import PieChart from './src/CanvasChart/PieChart';
+import PieChart from './src/Chart/CanvasChart/PieChart';
 
 export { PieChart };

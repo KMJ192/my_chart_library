@@ -1,11 +1,11 @@
 import { useDocument } from '@react/React';
-import LineChart from '@src/CanvasChart/AxisTypeChart/LineChart';
+import LineChart from '@src/Chart/CanvasChart/AxisTypeChart/LineChart';
 
 import {
   DataParamType,
   AxisParamType,
   RenderOption,
-} from '@src/CanvasChart/AxisTypeChart/AxisTypeChartTypes';
+} from '@src/Chart/CanvasChart/AxisTypeChart/AxisTypeChartTypes';
 
 interface Props {
   series: DataParamType;

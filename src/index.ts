@@ -5,4 +5,4 @@ import './static/style.css';
 
 React.render(App, document.getElementById('App'));
 
-import('@wasm').then((wasm) => wasm.wasm_module());
+// import('@wasm').then((wasm) => wasm.wasm_module());
