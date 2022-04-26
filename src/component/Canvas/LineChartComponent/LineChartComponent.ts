@@ -1,25 +1,23 @@
 import { useDocument } from '@react/React';
-import LineChart from '@src/Chart/CanvasChart/AxisTypeChart/LineChart';
 
-import {
-  DataParamType,
-  AxisParamType,
-  RenderOption,
-} from '@src/Chart/CanvasChart/AxisTypeChart/AxisTypeChartTypes';
+// interface Props {
+//   series: DataParamType;
+//   axis: AxisParamType;
+//   renderOption: RenderOption;
+// }
 
 interface Props {
-  series: DataParamType;
-  axis: AxisParamType;
-  renderOption: RenderOption;
+  series: any;
+  axis: any;
+  renderOption: any;
 }
 
 function LineChartComponent({ series, axis, renderOption }: Props) {
-  useDocument(() => {
-    const node = document.getElementById('layer');
-  });
+  useDocument(() => {});
 
   return `
-    <div id='layer' style='background-color: #FAFAFA; width: 1440px; height: 100%;'></div>
+    <div id='layer' style='background-color: #FAFAFA;'></div>
+    <div>test</div>
   `;
 }
 
