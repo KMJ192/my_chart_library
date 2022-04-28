@@ -19,5 +19,3 @@ declare module '*.module.sass' {
   const classes: { [key: string]: string };
   export default classes;
 }
-
-type ObjectType<K = any, V = any> = { [key: K]: V };

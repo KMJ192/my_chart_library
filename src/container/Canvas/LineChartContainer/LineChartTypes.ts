@@ -1,4 +1,4 @@
-import { ObjectType } from '@src/types';
+import { Properties as CSSProperties } from 'csstype';
 
 interface RenderOption {
   bottomAxis?: boolean;
@@ -21,11 +21,11 @@ interface LineChartParam {
   point?: number;
   font?: string;
   fontHeight?: number;
-  canvasStyle?: ObjectType;
+  canvasStyle?: CSSProperties;
   maxDataLength?: number;
   renderOption: RenderOption;
   tooltipId?: string;
-  tooltipStyle?: ObjectType;
+  tooltipStyle?: CSSProperties;
 }
 
 export { LineChartParam };
