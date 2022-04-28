@@ -1,19 +1,21 @@
+import { throttle } from 'lodash';
+
 import {
-  CanvasChartParam,
+  CanvasClassParam,
   CanvasLayer,
   CanvasLayerExt,
-} from './CanvasChartType';
+} from './CanvasClassType';
 
-class Canvas {
+class CanvasClass {
   protected topLevelNode: HTMLElement | null;
 
   protected canvasContainer: HTMLDivElement;
 
   protected canvasLayer: CanvasLayerExt[];
 
-  protected mainChartIdx: number;
+  protected mainCanvasIdx: number;
 
-  protected animationChartIdx: number;
+  protected animationCanvasIdx: number;
 
   protected evnets: Array<() => void | null>;
 
@@ -29,7 +31,7 @@ class Canvas {
 
   protected defaultValue: { [key: string]: any };
 
-  constructor(param: CanvasChartParam) {
+  constructor(param: CanvasClassParam) {
     const { id, width, height, canvasLayer } = param;
     this.defaultValue = {
       value: 0,
@@ -55,9 +57,9 @@ class Canvas {
 
     this.canvasContainer.style.position = 'relative';
 
-    this.mainChartIdx = 0;
+    this.mainCanvasIdx = 0;
 
-    this.animationChartIdx = 1;
+    this.animationCanvasIdx = 1;
 
     this.canvasLayer = [];
 
@@ -71,9 +73,9 @@ class Canvas {
         ctx: null,
       };
       if (type === 'main') {
-        this.mainChartIdx = idx;
+        this.mainCanvasIdx = idx;
       } else if (type === 'animation') {
-        this.animationChartIdx = idx;
+        this.animationCanvasIdx = idx;
       }
 
       this.canvasLayer[idx].canvas.width = width * dpr;
@@ -152,7 +154,7 @@ class Canvas {
    * @returns - 계산된 마우스 좌표
    */
   protected mousePosition = (x: number, y: number) => {
-    const { canvas } = this.canvasLayer[this.mainChartIdx];
+    const { canvas } = this.canvasLayer[this.mainCanvasIdx];
     const bbox = canvas.getBoundingClientRect();
 
     return {
@@ -166,7 +168,7 @@ class Canvas {
    * @param run - Run function when observed canvas
    * @param stop - Run function when escaped canvas
    */
-  protected canvasObserver<T, R>(run?: () => T, stop?: () => R) {
+  protected canvasObserver = <T, R>(run?: () => T, stop?: () => R) => {
     const observer = new IntersectionObserver(
       (entries: IntersectionObserverEntry[]) => {
         entries.forEach((entry: IntersectionObserverEntry) => {
@@ -179,34 +181,51 @@ class Canvas {
         });
       },
     );
-  }
+  };
 
   /**
    * Add events
    * @param eventArray
    */
-  protected addEvents(eventArray: Array<() => void | null>) {
+  protected addEvents = (eventArray: Array<() => void | null>) => {
     this.evnets = eventArray;
-  }
+  };
 
   /**
    * Remove events
    */
-  protected removeEvents() {
+  protected removeEvents = () => {
     this.evnets.forEach((eventFunction: () => void | null) => {
       if (typeof eventFunction === 'function') eventFunction();
     });
-  }
+  };
 
   /**
-   * Append Chart
+   * Append canvas node
    */
-  protected appendCanvasLayer() {
+  protected appendCanvasLayer = () => {
     if (this.topLevelNode) {
       this.topLevelNode.innerHTML = '';
       this.topLevelNode.appendChild(this.canvasContainer);
     }
-  }
+  };
+
+  /**
+   * Canvas resize event
+   */
+  protected canvasResizeEvent = <T>(run?: () => T) => {
+    const resizeEvent = throttle(() => {
+      this.correctionCnavas();
+      if (typeof run === 'function') {
+        run();
+      }
+    }, 800);
+
+    window.addEventListener('resize', resizeEvent);
+    return () => {
+      window.removeEventListener('resize', resizeEvent);
+    };
+  };
 }
 
-export default Canvas;
+export default CanvasClass;
