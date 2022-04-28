@@ -1,8 +1,8 @@
-import * as CSS from 'csstype';
+import { Properties as CSSProperties } from 'csstype';
 
 interface CanvasLayer {
   type: 'main' | 'animation' | 'static';
-  canvasStyle?: CSS.Properties;
+  canvasStyle?: CSSProperties;
   id?: string;
 }
 

@@ -15,7 +15,7 @@ class Canvas {
 
   protected animationChartIdx: number;
 
-  protected evnets: Array<any>;
+  protected evnets: Array<() => void | null>;
 
   protected tooltip: HTMLElement | null;
 
@@ -47,7 +47,7 @@ class Canvas {
     const dpr = window.devicePixelRatio;
 
     /**
-     * canvas layer 설정
+     * Setting canvas layer
      */
     this.topLevelNode = document.getElementById(id);
 
@@ -61,8 +61,8 @@ class Canvas {
 
     this.canvasLayer = [];
 
-    canvasLayer.forEach((level: CanvasLayer, idx) => {
-      const { type, id, canvasStyle } = level;
+    canvasLayer.forEach((layer: CanvasLayer, idx: number) => {
+      const { type, id, canvasStyle } = layer;
       this.canvasLayer[idx] = {
         type,
         id,
@@ -76,21 +76,27 @@ class Canvas {
         this.animationChartIdx = idx;
       }
 
-      this.canvasLayer[idx].ctx = this.canvasLayer[idx].canvas.getContext('2d');
+      this.canvasLayer[idx].canvas.width = width * dpr;
+      this.canvasLayer[idx].canvas.height = height * dpr;
+
+      /**
+       * Setting canvas style
+       */
+      if (canvasStyle) {
+        Object.entries(canvasStyle).forEach(([key, value]) => {
+          (this.canvasLayer[idx].canvas?.style as any)[key] = value;
+        });
+      }
       this.canvasLayer[idx].canvas.style.position = 'absolute';
       this.canvasLayer[idx].canvas.style.width = '100%';
 
-      this.canvasLayer[idx].canvas.width = width * dpr;
-      this.canvasLayer[idx].canvas.height = height * dpr;
+      this.canvasLayer[idx].ctx = this.canvasLayer[idx].canvas.getContext('2d');
       this.canvasLayer[idx].ctx?.scale(dpr, dpr);
-      this.canvasContainer.appendChild(this.canvasLayer[idx].canvas);
 
-      if (canvasStyle) {
-        Object.entries(canvasStyle).forEach(([key, value]) => {
-          if (key !== 'position' && key !== 'width')
-            (this.canvasLayer[idx].canvas?.style as any)[key] = value;
-        });
-      }
+      /**
+       * Created canvas append to canvas container node
+       */
+      this.canvasContainer.appendChild(this.canvasLayer[idx].canvas);
     });
 
     this.evnets = [];
@@ -107,7 +113,7 @@ class Canvas {
   }
 
   /**
-   * canvasLayer의 canvasIdx canvas의 rect 수정
+   * fillRect the canvasLayer[canvasIdx]
    * @param canvasIdx
    */
   protected ctxFillRect = (canvasIdx: number) => {
@@ -125,18 +131,82 @@ class Canvas {
     ctx.restore();
   };
 
-  // protected ctxClear() {
-  //   const { canvasLayer } = this;
-  //   canvasLayer.forEach((layer: CanvasLayerExt) => {
-  //     const { canvas, ctx } = layer;
-  //     ctx?.clearRect(0, 0, canvas.width, canvas.height);
-  //   });
-  // }
+  /**
+   * Correction canvas
+   */
+  protected correctionCnavas = () => {
+    const dpr = window.devicePixelRatio;
 
+    this.canvasLayer.forEach((layer: CanvasLayerExt) => {
+      const { canvas } = layer;
+      const { width, height } = canvas.getBoundingClientRect();
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+    });
+  };
+
+  /**
+   * Coordinates of mouse
+   * @param x - mouseover event.clientX
+   * @param y - mouseover event.clientY
+   * @returns - 계산된 마우스 좌표
+   */
   protected mousePosition = (x: number, y: number) => {
     const { canvas } = this.canvasLayer[this.mainChartIdx];
     const bbox = canvas.getBoundingClientRect();
+
+    return {
+      x: (x - bbox.left) * (canvas.width / bbox.width),
+      y: (y - bbox.top) * (canvas.height / bbox.height),
+    };
   };
+
+  /**
+   * canvas observer
+   * @param run - Run function when observed canvas
+   * @param stop - Run function when escaped canvas
+   */
+  protected canvasObserver<T, R>(run?: () => T, stop?: () => R) {
+    const observer = new IntersectionObserver(
+      (entries: IntersectionObserverEntry[]) => {
+        entries.forEach((entry: IntersectionObserverEntry) => {
+          const { isIntersecting } = entry;
+          if (isIntersecting) {
+            if (typeof run === 'function') run();
+          } else {
+            if (typeof stop === 'function') stop();
+          }
+        });
+      },
+    );
+  }
+
+  /**
+   * Add events
+   * @param eventArray
+   */
+  protected addEvents(eventArray: Array<() => void | null>) {
+    this.evnets = eventArray;
+  }
+
+  /**
+   * Remove events
+   */
+  protected removeEvents() {
+    this.evnets.forEach((eventFunction: () => void | null) => {
+      if (typeof eventFunction === 'function') eventFunction();
+    });
+  }
+
+  /**
+   * Append Chart
+   */
+  protected appendCanvasLayer() {
+    if (this.topLevelNode) {
+      this.topLevelNode.innerHTML = '';
+      this.topLevelNode.appendChild(this.canvasContainer);
+    }
+  }
 }
 
 export default Canvas;
