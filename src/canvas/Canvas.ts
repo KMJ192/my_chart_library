@@ -1,12 +1,8 @@
 import { throttle } from 'lodash';
 
-import {
-  CanvasClassParam,
-  CanvasLayer,
-  CanvasLayerExt,
-} from './CanvasClassType';
+import { CanvasParam, CanvasLayer, CanvasLayerExt } from './types';
 
-class CanvasClass {
+class Canvas {
   protected topLevelNode: HTMLElement | null;
 
   protected canvasContainer: HTMLDivElement;
@@ -19,20 +15,18 @@ class CanvasClass {
 
   protected evnets: Array<() => void | null>;
 
-  protected tooltip: HTMLElement | null;
-
   protected tooltipHTMLTemplate: string;
-
-  protected legend: HTMLElement | null;
 
   protected width: number;
 
   protected height: number;
 
+  protected font: string;
+
   protected defaultValue: { [key: string]: any };
 
-  constructor(param: CanvasClassParam) {
-    const { id, width, height, canvasLayer } = param;
+  constructor(param: CanvasParam) {
+    const { id, width, height, canvasLayer, font } = param;
     this.defaultValue = {
       value: 0,
       padding: 7,
@@ -43,7 +37,6 @@ class CanvasClass {
       font: 'normal 12px sans-serif',
       fontHeight: 12,
       background: '#FFF',
-      pointRadius: 3,
     };
 
     const dpr = window.devicePixelRatio;
@@ -103,40 +96,38 @@ class CanvasClass {
 
     this.evnets = [];
 
-    this.tooltip = null;
-
     this.tooltipHTMLTemplate = '';
-
-    this.legend = null;
 
     this.width = this.defaultValue.value;
 
     this.height = this.defaultValue.value;
+
+    this.font = font;
   }
 
-  /**
-   * fillRect the canvasLayer[canvasIdx]
-   * @param canvasIdx
-   */
-  protected ctxFillRect = (canvasIdx: number) => {
-    if (this.canvasLayer.length - 1 < canvasIdx) return;
-    const { canvasLayer, defaultValue } = this;
-    const { canvas, ctx, canvasStyle } = canvasLayer[canvasIdx];
-    if (ctx === null) return;
+  // /**
+  //  * fillRect the canvasLayer[canvasIdx]
+  //  * @param canvasIdx
+  //  */
+  // protected ctxFillRect = (canvasIdx: number) => {
+  //   if (this.canvasLayer.length - 1 < canvasIdx) return;
+  //   const { canvasLayer, defaultValue } = this;
+  //   const { canvas, ctx, canvasStyle } = canvasLayer[canvasIdx];
+  //   if (ctx === null) return;
 
-    ctx.save();
+  //   ctx.save();
 
-    ctx.fillStyle = canvasStyle?.background || defaultValue.background;
+  //   ctx.fillStyle = canvasStyle?.background || defaultValue.background;
 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  //   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.restore();
-  };
+  //   ctx.restore();
+  // };
 
   /**
    * Correction canvas
    */
-  protected correctionCnavas = () => {
+  protected correctionCanvas = () => {
     const dpr = window.devicePixelRatio;
 
     this.canvasLayer.forEach((layer: CanvasLayerExt) => {
@@ -181,6 +172,7 @@ class CanvasClass {
         });
       },
     );
+    observer.observe(this.canvasContainer);
   };
 
   /**
@@ -215,7 +207,7 @@ class CanvasClass {
    */
   protected canvasResizeEvent = <T>(run?: () => T) => {
     const resizeEvent = throttle(() => {
-      this.correctionCnavas();
+      this.correctionCanvas();
       if (typeof run === 'function') {
         run();
       }
@@ -228,4 +220,4 @@ class CanvasClass {
   };
 }
 
-export default CanvasClass;
+export default Canvas;

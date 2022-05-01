@@ -74,3 +74,22 @@ export function wrap(
 
   return parent.children[foundIdx] as HTMLElement;
 }
+
+/**
+ * class mixin
+ * @param targetClass
+ * @param baseClasses
+ */
+export function mixin(targetClass: any, baseClasses: any) {
+  baseClasses.forEach((baseClass: any) => {
+    Object.getOwnPropertyNames(baseClass.prototype).forEach((name) => {
+      const descriper = Object.getOwnPropertyDescriptor(
+        baseClass.prototype,
+        name,
+      );
+      if (descriper) {
+        Object.defineProperty(targetClass.prototype, name, descriper);
+      }
+    });
+  });
+}

@@ -1,1 +1,1 @@
-export { default } from './CanvasClass';
+export { default } from './Canvas';

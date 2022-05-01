@@ -11,11 +11,12 @@ interface CanvasLayerExt extends CanvasLayer {
   ctx: CanvasRenderingContext2D | null;
 }
 
-interface CanvasClassParam {
+interface CanvasParam {
   id: string;
   width: number;
   height: number;
   canvasLayer: CanvasLayer[];
+  font: string;
 }
 
-export { CanvasClassParam, CanvasLayerExt, CanvasLayer };
+export { CanvasParam, CanvasLayerExt, CanvasLayer };
