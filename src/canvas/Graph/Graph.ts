@@ -64,6 +64,8 @@ class Graph extends Canvas {
   public render = () => {
     this.addEvents([]);
 
+    this.appendCanvasLayer();
+
     return () => {
       this.removeEvents();
     };

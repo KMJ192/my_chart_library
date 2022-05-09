@@ -1,38 +1,40 @@
+import { AxisType, RenderOption, SeriesInfo } from '@src/canvas/Graph/types';
 import LineChartComponent from '@src/component/Canvas/LineChartComponent';
 
 function LineChartContainer() {
-  const series = {
-    left: [
+  const series: SeriesInfo = {
+    leftAxisInfo: [
       {
-        color: 'red',
         name: 'left1',
+        color: 'red',
         lineWidth: 1,
-        series: [9, 3, 3, 4, 5, 9, 3, 3, 4, 5, 9, 3, 3, 4, 5],
+        vertex: [9, 3, 3, 4, 5, 9, 3, 3, 4, 5, 9, 3, 3, 4, 5],
       },
       {
-        color: 'blue',
         name: 'left2',
+        color: 'blue',
         lineWidth: 1,
-        series: [10, 4, 7, 8, 7, 10, 4, 7, 8, 7, 10, 4, 7, 8, 7],
+        vertex: [10, 4, 7, 8, 7, 10, 4, 7, 8, 7, 10, 4, 7, 8, 7],
       },
     ],
-    right: [
+    rightAxisInfo: [
       {
-        series: [42, 32, 41, 32, 47, 42, 32, 41, 32, 47, 42, 32, 41, 32, 47],
         name: 'right1',
+        vertex: [42, 32, 41, 32, 47, 42, 32, 41, 32, 47, 42, 32, 41, 32, 47],
         lineWidth: 1,
         color: '#8D3F47',
       },
       {
         name: 'right2',
-        series: [32, 25, 23, 29, 10, 32, 25, 23, 29, 10, 32, 25, 23, 29, 10],
-        lineWidth: 2,
+        vertex: [32, 25, 23, 29, 10, 32, 25, 23, 29, 10, 32, 25, 23, 29, 10],
+        lineWidth: 1,
         color: '#FD3FA7',
       },
     ],
   };
-  const axis = {
-    bottom: {
+
+  const axis: AxisType = {
+    bottomXAxis: {
       unitsPerTick: 3,
       name: 'X axis',
       tickSize: 7,
@@ -55,20 +57,21 @@ function LineChartContainer() {
         '2022-02-08 01:00:00',
       ],
     },
-    left: {
+    leftYAxis: {
       name: 'left axis',
       unitsPerTick: 1,
       tickSize: 7,
       lineWidth: 1,
     },
-    right: {
+    rightYAxis: {
       name: 'right axis',
       unitsPerTick: 10,
       tickSize: 7,
       lineWidth: 1,
     },
   };
-  const renderOption = {
+
+  const renderOption: RenderOption = {
     bottomAxis: true,
     bottomTick: true,
     bottomText: true,

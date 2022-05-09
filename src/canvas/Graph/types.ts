@@ -17,19 +17,23 @@ interface GraphParam {
 interface AxisInfo {
   name: string;
   unitsPerTick: number;
-  max: number;
-  min: number;
-  padding: number;
-  tickSize: number;
-  lineWidth: number;
-  color: string;
+  max?: number;
+  min?: number;
+  padding?: number;
+  tickSize?: number;
+  lineWidth?: number;
+  color?: string;
+}
+
+interface XAxisInfo extends AxisInfo {
+  data?: string[];
 }
 
 interface AxisType {
-  yAxisLeft: AxisInfo;
-  yAxisRight: AxisInfo;
-  xAxisTop: AxisInfo;
-  xAxisBottom: AxisInfo;
+  leftYAxis: AxisInfo;
+  bottomXAxis: XAxisInfo;
+  rightYAxis?: AxisInfo;
+  topXAxis?: XAxisInfo;
 }
 
 interface AxisPosition {
@@ -40,16 +44,21 @@ interface AxisPosition {
 }
 
 // series info types
-interface Series {
+interface SeriesType {
   name: string;
   vertex: DataType;
   color: string;
   lineWidth: number;
 }
 
-// data initialize param
+interface SeriesInfo {
+  leftAxisInfo: SeriesType[];
+  rightAxisInfo?: SeriesType[];
+}
+
+// Graph Object param
 interface InitializeParam {
-  series: Series[];
+  series: SeriesType[];
   axis: AxisType[];
 }
 
@@ -85,9 +94,10 @@ export {
   AxisPosition,
   GraphParam,
   AxisType,
-  Series,
+  SeriesType,
   DataType,
   InitializeParam,
   RenderOption,
   LineChartParam,
+  SeriesInfo,
 };

@@ -2,12 +2,6 @@ import { useDocument } from '@react/React';
 import Graph from '@src/canvas/Graph';
 import { GraphParam } from '@src/canvas/Graph/types';
 
-// interface Props {
-//   series: DataParamType;
-//   axis: AxisParamType;
-//   renderOption: RenderOption;
-// }
-
 interface Props {
   series: any;
   axis: any;
@@ -23,12 +17,12 @@ function LineChartComponent({ series, axis, renderOption }: Props) {
     const data = {};
 
     const LineGraph = new Graph(param);
-    LineGraph.initialize();
+    LineGraph.initialize = data;
     LineGraph.render();
   });
 
   return `
-    <div id='layer' style='background-color: #FAFAFA;'></div>
+    <div id="layer" style="background-color: #FAFAFA;"></div>
   `;
 }
 
