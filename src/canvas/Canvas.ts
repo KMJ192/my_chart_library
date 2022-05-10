@@ -34,7 +34,6 @@ class Canvas {
       place: 20,
       color: '#000',
       unitsPerTick: 1,
-      font: 'normal 12px sans-serif',
       fontHeight: 12,
       background: '#FFF',
     };
@@ -104,25 +103,6 @@ class Canvas {
 
     this.font = font;
   }
-
-  // /**
-  //  * fillRect the canvasLayer[canvasIdx]
-  //  * @param canvasIdx
-  //  */
-  // protected ctxFillRect = (canvasIdx: number) => {
-  //   if (this.canvasLayer.length - 1 < canvasIdx) return;
-  //   const { canvasLayer, defaultValue } = this;
-  //   const { canvas, ctx, canvasStyle } = canvasLayer[canvasIdx];
-  //   if (ctx === null) return;
-
-  //   ctx.save();
-
-  //   ctx.fillStyle = canvasStyle?.background || defaultValue.background;
-
-  //   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  //   ctx.restore();
-  // };
 
   /**
    * Correction canvas

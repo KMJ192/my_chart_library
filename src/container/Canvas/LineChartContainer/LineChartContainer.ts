@@ -1,5 +1,7 @@
-import { AxisType, RenderOption, SeriesInfo } from '@src/canvas/Graph/types';
 import LineChartComponent from '@src/component/Canvas/LineChartComponent';
+
+import { RenderOption, SeriesInfo } from '@src/canvas/Graph/types';
+import { AxisInfo } from '@src/canvas/Graph/Unit/Axis/types';
 
 function LineChartContainer() {
   const series: SeriesInfo = {
@@ -33,13 +35,13 @@ function LineChartContainer() {
     ],
   };
 
-  const axis: AxisType = {
+  const axis: AxisInfo = {
     bottomXAxis: {
       unitsPerTick: 3,
       name: 'X axis',
       tickSize: 7,
       lineWidth: 1,
-      data: [
+      labels: [
         '2022-02-07 09:00:00',
         '2022-02-07 13:00:00',
         '2022-02-07 17:00:00',

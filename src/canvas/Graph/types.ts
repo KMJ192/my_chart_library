@@ -1,5 +1,6 @@
 import { Properties as CSSProperties } from 'csstype';
-import { CanvasParam } from '../types';
+import { CanvasParam } from '@src/canvas/types';
+import { AxisInfo } from '@src/canvas/Graph/Unit/Axis/types';
 
 // data param
 type DataType = number[] | string[] | Date[];
@@ -11,36 +12,6 @@ interface GraphParam {
   height?: number;
   font?: string;
   vertexRadius?: number;
-}
-
-// axis info types
-interface AxisInfo {
-  name: string;
-  unitsPerTick: number;
-  max?: number;
-  min?: number;
-  padding?: number;
-  tickSize?: number;
-  lineWidth?: number;
-  color?: string;
-}
-
-interface XAxisInfo extends AxisInfo {
-  data?: string[];
-}
-
-interface AxisType {
-  leftYAxis: AxisInfo;
-  bottomXAxis: XAxisInfo;
-  rightYAxis?: AxisInfo;
-  topXAxis?: XAxisInfo;
-}
-
-interface AxisPosition {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
 }
 
 // series info types
@@ -59,9 +30,10 @@ interface SeriesInfo {
 // Graph Object param
 interface InitializeParam {
   series: SeriesType[];
-  axis: AxisType[];
+  axis: AxisInfo[];
 }
 
+// Graph render options
 interface RenderOption {
   bottomAxis?: boolean;
   bottomTick?: boolean;
@@ -91,9 +63,7 @@ interface LineChartParam {
 }
 
 export {
-  AxisPosition,
   GraphParam,
-  AxisType,
   SeriesType,
   DataType,
   InitializeParam,
